@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#142b49"><title>SMART BUSINESS</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--navy:#142b49;--blue:#2463a6;--bg:#f3f6fa;--ink:#182334;--muted:#718096;--line:#e5eaf1;--white:#fff;--green:#14845b;--red:#c43d48}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+header{background:var(--navy);color:white;padding:18px max(16px,calc((100% - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:12px;background:white;color:var(--navy);display:grid;place-items:center;font-weight:900;font-size:20px}
+.brand strong{display:block;letter-spacing:.5px}.brand small{color:#cbd8e8}.header-actions{display:flex;gap:8px;align-items:center}
+main{max-width:1120px;margin:24px auto;padding:0 16px}.auth{max-width:430px;margin:8vh auto;background:white;padding:26px;border-radius:18px;box-shadow:0 10px 35px #142b4914}
+h1,h2,h3,p{margin-top:0}.auth h1{font-size:25px}.muted{color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;font-weight:650;margin:13px 0 6px}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}
+.btn{border:0;border-radius:10px;padding:11px 15px;background:var(--blue);color:white;font-weight:650}.btn.secondary{background:#eaf0f7;color:var(--navy)}.btn.danger{background:#fff0f0;color:var(--red)}.btn.full{width:100%;margin-top:16px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 3px 12px #172b4908}
+.metric small{color:var(--muted)}.metric strong{display:block;font-size:25px;margin-top:7px}.metric .symbol{font-size:20px;color:var(--blue)}
+.layout{display:grid;grid-template-columns:220px 1fr;gap:16px}.sidebar{background:white;border:1px solid var(--line);border-radius:15px;padding:10px;height:max-content}
+.nav{width:100%;border:0;background:transparent;text-align:left;padding:12px;border-radius:9px;color:#40516a;font-weight:600}.nav.active,.nav:hover{background:#edf3fa;color:var(--navy)}
+.content{min-width:0}.section{display:none}.section.active{display:block}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:650}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.pill{font-size:11px;padding:4px 8px;border-radius:30px;background:#e8f6ef;color:var(--green)}
+.empty{padding:25px;text-align:center;color:var(--muted)}.modal-backdrop{position:fixed;inset:0;background:#101c2dcc;display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}.modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.modal-head h2{margin:0}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.notice{background:#fff8e8;border:1px solid #f2dfb3;padding:12px;border-radius:10px;color:#72551a;font-size:13px;margin-bottom:16px}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;gap:4px}.nav{width:auto;white-space:nowrap}.row{grid-template-columns:1fr}main{margin:16px auto}}
+</style></head>
+<body>
+<header><div class="brand"><div class="logo">SB</div><div><strong>SMART BUSINESS</strong><small>Powered by ABS KANO LTD</small></div></div><div class="header-actions"><button class="btn secondary" id="langBtn">Hausa</button><button class="btn secondary hidden" id="logoutBtn">Log out</button></div></header>
+<main>
+<section id="authView" class="auth">
+<h1 id="authTitle">Create your business account</h1><p class="muted">Manage sales, stock, expenses and customers in one place.</p>
+<div id="registerFields"><label>Business name</label><input id="businessName" placeholder="e.g. My Store"><label>Your name</label><input id="ownerName" placeholder="Full name"></div>
+<label>Email</label><input id="email" type="email" placeholder="you@example.com">
+<label>Password</label><input id="password" type="password" placeholder="At least 8 characters">
+<button class="btn full" id="authSubmit">Create account</button>
+<p class="muted" style="margin:16px 0 0;text-align:center"><span id="switchText">Already registered?</span> <a href="#" id="switchAuth">Log in</a></p>
+<p class="muted" style="margin:12px 0 0">Prototype only: account details are stored on this device. Do not use real passwords or sensitive business data.</p>
+</section>
+<section id="appView" class="hidden">
+<div class="topline"><div><h1 id="welcome">Business dashboard</h1><p class="muted" id="businessLabel">Your business at a glance</p></div><span class="pill">Starter workspace</span></div>
+<div class="notice">This is the first working prototype. Data is saved in this browser only; secure cloud accounts and multi-device sync will be connected in the next development stage.</div>
+<div class="layout"><aside class="sidebar">
+<button class="nav active" data-section="overview">▦ Overview</button><button class="nav" data-section="sales">＋ Sales</button><button class="nav" data-section="products">▣ Products</button><button class="nav" data-section="expenses">↘ Expenses</button><button class="nav" data-section="customers">♙ Customers</button><button class="nav" data-section="reports">▤ Reports</button><button class="nav" data-section="settings">⚙ Settings</button>
+</aside><div class="content">
+<section class="section active" id="overview"><div class="grid">
+<div class="card metric"><small>Total sales</small><strong id="totalSales">₦0</strong></div><div class="card metric"><small>Total expenses</small><strong id="totalExpenses">₦0</strong></div><div class="card metric"><small>Estimated profit*</small><strong id="profit">₦0</strong></div><div class="card metric"><small>Products</small><strong id="productCount">0</strong></div></div>
+<div class="card" style="margin-top:15px"><h3>Recent activity</h3><div id="recent" class="empty">No transactions yet. Add your first sale or expense.</div></div><p class="muted" style="margin-top:10px">*Profit shown here is sales minus recorded expenses; cost-of-goods accounting will be added in the full version.</p></section>
+<section class="section" id="sales"><div class="topline"><h2>Sales</h2><button class="btn" id="addSale">＋ Record sale</button></div><div class="card tablewrap"><table><thead><tr><th>Date</th><th>Product / Description</th><th>Qty</th><th>Payment</th><th>Amount</th></tr></thead><tbody id="salesRows"></tbody></table><div id="salesEmpty" class="empty">No sales recorded.</div></div></section>
+<section class="section" id="products"><div class="topline"><h2>Products & stock</h2><div class="actions"><button class="btn secondary" id="manageCategories">Manage categories</button><button class="btn" id="addProduct">＋ Add product</button></div></div><div class="card tablewrap"><table><thead><tr><th>Product</th><th>Category</th><th>SKU / Part no.</th><th>Quantity</th><th>Cost price</th><th>Selling price</th><th>Stock status</th></tr></thead><tbody id="productRows"></tbody></table><div id="productsEmpty" class="empty">No products added.</div></div></section>
+<section class="section" id="expenses"><div class="topline"><h2>Expenses</h2><button class="btn" id="addExpense">＋ Record expense</button></div><div class="card tablewrap"><table><thead><tr><th>Date</th><th>Category / Description</th><th>Payment</th><th>Amount</th></tr></thead><tbody id="expenseRows"></tbody></table><div id="expensesEmpty" class="empty">No expenses recorded.</div></div></section>
+<section class="section" id="customers"><div class="topline"><h2>Customers</h2><button class="btn" id="addCustomer">＋ Add customer</button></div><div class="card tablewrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th>Total purchases</th><th>Outstanding debt</th><th>Action</th></tr></thead><tbody id="customerRows"></tbody></table><div id="customersEmpty" class="empty">No customers added.</div></div></section>
+<section class="section" id="reports">
+ <div class="topline"><div><h2>Reports & Business Analytics</h2><p class="muted">Understand sales, expenses, stock and customer balances.</p></div><button class="btn secondary" id="exportBtn">Download data (JSON)</button></div>
+ <div class="grid">
+  <div class="card metric"><small>Total sales</small><strong id="reportSales">₦0</strong></div>
+  <div class="card metric"><small>Total expenses</small><strong id="reportExpenses">₦0</strong></div>
+  <div class="card metric"><small>Net after recorded expenses*</small><strong id="reportNet">₦0</strong></div>
+  <div class="card metric"><small>Customer debts</small><strong id="reportDebts">₦0</strong></div>
+ </div>
+ <h3 style="margin-top:20px">Sales performance</h3>
+ <div class="grid">
+  <div class="card metric"><small>Today</small><strong id="dailySales">₦0</strong><span class="muted" id="dailyCount">0 sales</span></div>
+  <div class="card metric"><small>This week</small><strong id="weeklySales">₦0</strong><span class="muted" id="weeklyCount">0 sales</span></div>
+  <div class="card metric"><small>This month</small><strong id="monthlySales">₦0</strong><span class="muted" id="monthlyCount">0 sales</span></div>
+  <div class="card metric"><small>Stock at cost value</small><strong id="stockValue">₦0</strong><span class="muted" id="stockUnits">0 units in stock</span></div>
+ </div>
+ <div class="card" style="margin-top:15px"><h3>Best-selling products</h3><div id="bestProducts" class="empty">No sales data yet.</div></div>
+ <div class="card" style="margin-top:15px"><h3>Expense breakdown</h3><div id="expenseBreakdown" class="empty">No expenses recorded.</div></div>
+ <p class="muted" style="margin-top:12px">*Net after recorded expenses is sales minus recorded expenses only. It is not final accounting profit because cost of goods sold, taxes and other adjustments are not yet included. Stock value uses the cost prices entered for products.</p>
+</section>
+<section class="section" id="settings">
+ <h2>Settings & Business Control</h2>
+ <p class="muted">Manage your business details and protect your records with backups.</p>
+ <div class="card">
+  <h3>Business profile</h3>
+  <form id="businessSettingsForm">
+   <label for="editBusinessName">Business name</label><input id="editBusinessName" required>
+   <label for="editOwnerName">Account owner</label><input id="editOwnerName" required>
+   <label for="editEmail">Account Gmail / Email</label><input id="editEmail" type="email" required placeholder="example@gmail.com" autocomplete="email">
+   <p class="muted">Currency: Nigerian Naira (NGN · ₦)</p>
+   <button class="btn" type="submit">Save business details</button>
+  </form>
+ </div>
+ <div class="card" style="margin-top:15px">
+  <h3>Data backup & restore</h3>
+  <p class="muted">Download a copy of your products, sales, expenses, customers and settings. Keep the backup file somewhere safe.</p>
+  <div class="actions"><button class="btn secondary" id="exportBtn">Download backup (JSON)</button></div>
+  <label for="restoreFile">Restore from backup file</label><input id="restoreFile" type="file" accept=".json,application/json">
+  <p class="muted">Restoring replaces the records currently saved in this browser. Download a backup first.</p>
+  <button class="btn secondary" id="restoreBtn" type="button">Restore backup</button>
+ </div>
+ <div class="card" style="margin-top:15px">
+  <h3>Account & security</h3>
+  <p class="muted">This is still a local prototype. Login details are not securely authenticated and the app does not yet support password changes, separate staff accounts, or permissions. Do not use a real password or treat this as a secure cloud account.</p>
+ </div>
+ <div class="card" style="margin-top:15px">
+  <h3>Danger zone</h3><p class="muted">Delete the demo records saved in this browser.</p>
+  <button class="btn danger" id="clearBtn">Clear local demo data</button>
+ </div>
+</section>
+</div></div></section>
+<div id="categoryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+ <div class="modal">
+  <div class="modal-head"><h2 id="categoryModalTitle">Manage categories</h2><button type="button" class="btn secondary" id="closeCategoryModal">✕</button></div>
+  <p class="muted">Add your own categories, rename existing ones, or delete categories you no longer use.</p>
+  <div class="row"><div><label for="newCategoryName">New category name</label><input id="newCategoryName" placeholder="e.g. Brake Caliper"></div><div style="display:flex;align-items:end"><button type="button" class="btn" id="addCategory" style="width:100%">＋ Add category</button></div></div>
+  <div id="categoryList" style="margin-top:14px"></div>
+ </div>
+</div>
+
+
+<div id="expenseModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+ <form id="expenseForm" class="modal">
+  <div class="modal-head"><h2 id="expenseModalTitle">Record new expense</h2><button type="button" class="btn secondary" id="closeExpenseModal">✕</button></div>
+  <p class="muted">Record business costs so your dashboard and reports stay up to date.</p>
+  <label for="expenseCategory">Expense category *</label><select id="expenseCategory" required><option value="Stock purchase">Stock purchase</option><option value="Transport">Transport</option><option value="Rent">Rent</option><option value="Salary">Salary</option><option value="Utilities">Utilities</option><option value="Repairs & maintenance">Repairs & maintenance</option><option value="Other">Other</option></select>
+  <label for="expenseDescription">Description *</label><input id="expenseDescription" required placeholder="e.g. Transport for spare parts">
+  <div class="row"><div><label for="expenseAmount">Amount (₦) *</label><input id="expenseAmount" type="number" min="0.01" step="0.01" required placeholder="0"></div><div><label for="expensePayment">Payment method *</label><select id="expensePayment" required><option value="Cash">Cash</option><option value="Transfer">Transfer</option><option value="POS">POS</option></select></div></div>
+  <label for="expenseDate">Date *</label><input id="expenseDate" type="date" required>
+  <div class="form-actions"><button type="button" class="btn secondary" id="cancelExpense">Cancel</button><button type="submit" class="btn">Save expense</button></div>
+ </form>
+</div>
+
+<div id="customerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle">
+ <form id="customerForm" class="modal">
+  <div class="modal-head"><h2 id="customerModalTitle">Add new customer</h2><button type="button" class="btn secondary" id="closeCustomerModal">✕</button></div>
+  <p class="muted">Save customer contact details to track purchases and credit balance.</p>
+  <label for="customerName">Customer name *</label><input id="customerName" required placeholder="Full name">
+  <label for="customerPhone">Phone number *</label><input id="customerPhone" type="tel" required placeholder="e.g. 08012345678">
+  <label for="customerAddress">Address (optional)</label><input id="customerAddress" placeholder="Area / city">
+  <div class="form-actions"><button type="button" class="btn secondary" id="cancelCustomer">Cancel</button><button type="submit" class="btn">Save customer</button></div>
+ </form>
+</div>
+
+<div id="customerProfileModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="customerProfileTitle">
+ <div class="modal">
+  <div class="modal-head"><h2 id="customerProfileTitle">Customer profile</h2><button type="button" class="btn secondary" id="closeCustomerProfile">✕</button></div>
+  <div id="customerProfileContent"></div>
+ </div>
+</div>
+<div id="saleModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="saleModalTitle">
+ <form id="saleForm" class="modal">
+  <div class="modal-head"><h2 id="saleModalTitle">Record new sale</h2><button type="button" class="btn secondary" id="closeSaleModal">✕</button></div>
+  <p class="muted">Choose a product. Its selling price will fill automatically and stock will reduce after saving.</p>
+  <label for="saleProduct">Product *</label><select id="saleProduct" required><option value="">Select product</option></select>
+  <div class="row"><div><label for="saleQty">Quantity *</label><input id="saleQty" type="number" min="1" step="1" value="1" required></div><div><label for="salePrice">Unit selling price (₦)</label><input id="salePrice" type="number" readonly value="0"></div></div>
+  <div class="row"><div><label for="saleTotal">Total amount (₦)</label><input id="saleTotal" type="number" readonly value="0"></div><div><label for="salePayment">Payment method *</label><select id="salePayment" required><option value="Cash">Cash</option><option value="Transfer">Transfer</option><option value="POS">POS</option><option value="Credit">Credit (pay later)</option></select></div></div>
+  <label for="saleCustomer">Customer name (required for credit)</label><input id="saleCustomer" placeholder="Customer name">
+  <div class="form-actions"><button type="button" class="btn secondary" id="cancelSale">Cancel</button><button type="submit" class="btn">Complete sale</button></div>
+ </form>
+</div>
+<div id="productModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+ <form id="productForm" class="modal">
+  <div class="modal-head"><h2 id="productModalTitle">Add new product</h2><button type="button" class="btn secondary" id="closeProductModal">✕</button></div>
+  <p class="muted">Enter the product details and stock information.</p>
+  <label for="pName">Product name *</label><input id="pName" required placeholder="e.g. ABS Sensor Toyota Prado">
+  <div class="row"><div><label for="pCategory">Category</label><select id="pCategory"><option value="">Select category</option></select></div><div><label for="pSku">SKU / Part number</label><input id="pSku" placeholder="Optional"></div></div>
+  <div class="row"><div><label for="pQty">Opening quantity *</label><input id="pQty" type="number" min="0" step="1" required placeholder="0"></div><div><label for="pAlert">Low-stock alert at</label><input id="pAlert" type="number" min="0" step="1" value="2"></div></div>
+  <div class="row"><div><label for="pCost">Cost price (₦)</label><input id="pCost" type="number" min="0" step="0.01" placeholder="0"></div><div><label for="pPrice">Selling price (₦) *</label><input id="pPrice" type="number" min="0" step="0.01" required placeholder="0"></div></div>
+  <label for="pSupplier">Supplier (optional)</label><input id="pSupplier" placeholder="Supplier name">
+  <div class="form-actions"><button type="button" class="btn secondary" id="cancelProduct">Cancel</button><button type="submit" class="btn">Save product</button></div>
+ </form>
+</div></main>
+<script>
+const $=id=>document.getElementById(id);let mode="register",lang="en",data=null;
+const key="smartBusinessPrototype_v1";
+const money=n=>"₦"+Number(n||0).toLocaleString("en-NG",{maximumFractionDigits:2});
+function save(){localStorage.setItem(key,JSON.stringify(data));render()}
+function load(){try{return JSON.parse(localStorage.getItem(key))}catch{return null}}
+function showAuth(){ $("authView").classList.remove("hidden");$("appView").classList.add("hidden");$("logoutBtn").classList.add("hidden")}
+function showApp(){ $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");render()}
+function authMode(){mode=mode==="register"?"login":"register";$("registerFields").classList.toggle("hidden",mode==="login");$("authTitle").textContent=mode==="register"?"Create your business account":"Log in to SMART BUSINESS";$("authSubmit").textContent=mode==="register"?"Create account":"Log in";$("switchText").textContent=mode==="register"?"Already registered?":"New to SMART BUSINESS?";$("switchAuth").textContent=mode==="register"?"Log in":"Create account"}
+$("switchAuth").onclick=e=>{e.preventDefault();authMode()};
+$("authSubmit").onclick=()=>{const email=$("email").value.trim().toLowerCase(),pass=$("password").value;if(!email||pass.length<8)return alert("Enter a valid email and a password of at least 8 characters.");if(mode==="register"){const business=$("businessName").value.trim(),owner=$("ownerName").value.trim();if(!business||!owner)return alert("Enter your business name and your name.");data={email,business,owner,sales:[],expenses:[],products:[],customers:[],customerPayments:[],categories:["ABS Module","ABS Sensor","Brake Parts","Electronic Parts","Other"]};save();showApp()}else{data=load();if(!data||data.email!==email)return alert("No matching local demo account found. Register on this device first.");showApp()}};
+$("logoutBtn").onclick=()=>{data=null;showAuth()};
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(b.dataset.section).classList.add("active")});
+function rows(id,arr,fn){$(id).innerHTML=arr.map(fn).join("")}
+
+function reportDate(value){
+ if(!value)return null;
+ const text=String(value).trim();
+ let m=text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+ if(m)return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+ m=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+ if(m)return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
+ const d=new Date(text);return Number.isNaN(d.getTime())?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function renderReports(){
+ const sales=data.sales||[],expenses=data.expenses||[],products=data.products||[];
+ const totalSales=sales.reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const totalExpenses=expenses.reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const credit=sales.filter(x=>x.payment==="Credit").reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const paid=(data.customerPayments||[]).reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const debt=Math.max(0,credit-paid);
+ const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const weekStart=new Date(today);weekStart.setDate(today.getDate()-((today.getDay()+6)%7));
+ const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+ const inRange=(sale,start,end)=>{
+  const d=reportDate(sale.date);return d&&d>=start&&d<=end;
+ };
+ const sumSales=arr=>arr.reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const todaySales=sales.filter(x=>inRange(x,today,today));
+ const weekSales=sales.filter(x=>inRange(x,weekStart,today));
+ const monthSales=sales.filter(x=>inRange(x,monthStart,today));
+ $("reportSales").textContent=money(totalSales);
+ $("reportExpenses").textContent=money(totalExpenses);
+ $("reportNet").textContent=money(totalSales-totalExpenses);
+ $("reportDebts").textContent=money(debt);
+ $("dailySales").textContent=money(sumSales(todaySales));$("dailyCount").textContent=todaySales.length+" sales";
+ $("weeklySales").textContent=money(sumSales(weekSales));$("weeklyCount").textContent=weekSales.length+" sales";
+ $("monthlySales").textContent=money(sumSales(monthSales));$("monthlyCount").textContent=monthSales.length+" sales";
+ const units=products.reduce((sum,p)=>sum+Math.max(0,Number(p.qty)||0),0);
+ const stockValue=products.reduce((sum,p)=>sum+Math.max(0,Number(p.qty)||0)*Math.max(0,Number(p.cost)||0),0);
+ $("stockValue").textContent=money(stockValue);$("stockUnits").textContent=units+" units in stock";
+ const best={};
+ sales.forEach(s=>{
+  const name=String(s.productName||s.desc||"Other").trim()||"Other";
+  if(!best[name])best[name]={amount:0,qty:0,qtyKnown:false};
+  best[name].amount+=Number(s.amount||0);
+  if(s.qty!==undefined&&Number.isFinite(Number(s.qty))){best[name].qty+=Number(s.qty);best[name].qtyKnown=true;}
+ });
+ const bestList=Object.entries(best).sort((a,b)=>b[1].amount-a[1].amount).slice(0,5);
+ $("bestProducts").innerHTML=bestList.length?bestList.map(([name,v])=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px"><strong>${esc(name)}</strong><strong>${money(v.amount)}</strong></div><div class="muted">${v.qtyKnown?v.qty+" units recorded":"Quantity not available for older sale records"}</div></div>`).join(""):"No sales data yet.";
+ const categories={};expenses.forEach(x=>{const cat=x.category||"Other";categories[cat]=(categories[cat]||0)+Number(x.amount||0)});
+ const expenseList=Object.entries(categories).sort((a,b)=>b[1]-a[1]);
+ $("expenseBreakdown").innerHTML=expenseList.length?expenseList.map(([name,amount])=>`<div style="padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px"><span>${esc(name)}</span><strong>${money(amount)}</strong></div>`).join(""):"No expenses recorded.";
+}
+
+function render(){if(!data)return;if(!Array.isArray(data.customerPayments))data.customerPayments=[];if(!Array.isArray(data.categories))data.categories=["ABS Module","ABS Sensor","Brake Parts","Electronic Parts","Other"];let s=data.sales.reduce((a,x)=>a+Number(x.amount),0),e=data.expenses.reduce((a,x)=>a+Number(x.amount),0);$("welcome").textContent="Welcome, "+data.owner;$("businessLabel").textContent=data.business;$("totalSales").textContent=money(s);$("totalExpenses").textContent=money(e);$("profit").textContent=money(s-e);$("productCount").textContent=data.products.length;$("reportSales").textContent=money(s);$("reportExpenses").textContent=money(e);$("reportNet").textContent=money(s-e);renderReports();$("settingsBusiness").textContent=data.business;$("settingsOwner").textContent=data.owner;if($("editBusinessName"))$("editBusinessName").value=data.business||"";if($("editOwnerName"))$("editOwnerName").value=data.owner||"";if($("editEmail"))$("editEmail").value=data.email||"";
+rows("salesRows",data.sales,x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.desc)}</td><td>${x.qty??"—"}</td><td>${esc(x.payment||"—")}</td><td>${money(x.amount)}</td></tr>`);$("salesEmpty").classList.toggle("hidden",data.sales.length>0);
+rows("expenseRows",data.expenses,x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.category||"Other")}: ${esc(x.desc)}</td><td>${esc(x.payment||"—")}</td><td>${money(x.amount)}</td></tr>`);$("expensesEmpty").classList.toggle("hidden",data.expenses.length>0);
+rows("productRows",data.products,x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.category||"—")}</td><td>${esc(x.sku||"—")}</td><td>${x.qty}</td><td>${money(x.cost||0)}</td><td>${money(x.price)}</td><td><span class="pill" style="background:${Number(x.qty)<=Number(x.alertAt??2)?"#fff0f0":"#e8f6ef"};color:${Number(x.qty)<=Number(x.alertAt??2)?"#c43d48":"#14845b"}">${Number(x.qty)<=Number(x.alertAt??2)?"Low stock":"In stock"}</span></td></tr>`);$("productsEmpty").classList.toggle("hidden",data.products.length>0);
+rows("customerRows",data.customers,(x,index)=>{
+ const keyName=String(x.name||"").trim().toLowerCase();
+ const purchases=data.sales.filter(s=>String(s.customer||"").trim().toLowerCase()===keyName).reduce((sum,s)=>sum+Number(s.amount||0),0);
+ const credit=data.sales.filter(s=>String(s.customer||"").trim().toLowerCase()===keyName&&s.payment==="Credit").reduce((sum,s)=>sum+Number(s.amount||0),0);
+ const paid=data.customerPayments.filter(p=>String(p.customer||"").trim().toLowerCase()===keyName).reduce((sum,p)=>sum+Number(p.amount||0),0);
+ const debt=Math.max(0,credit-paid);
+ return `<tr><td>${esc(x.name)}</td><td>${esc(x.phone||"—")}</td><td>${esc(x.address||"—")}</td><td>${money(purchases)}</td><td>${money(debt)}</td><td><div class="actions"><button class="btn secondary" onclick="openCustomerProfile(${index})">View profile</button><button class="btn" onclick="recordCustomerPayment(${index})" ${debt<=0?"disabled":""}>Receive payment</button></div></td></tr>`;
+});$("customersEmpty").classList.toggle("hidden",data.customers.length>0);
+let recent=[...data.sales.map(x=>({...x,type:"Sale"})),...data.expenses.map(x=>({...x,type:"Expense"}))].slice(-5).reverse();$("recent").innerHTML=recent.length?recent.map(x=>`<p>${x.type}: ${esc(x.desc)} — ${money(x.amount)}</p>`).join(""):"No transactions yet. Add your first sale or expense."}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function askAmount(label){let desc=prompt(label+" description:");if(desc===null||!desc.trim())return;let amount=Number(prompt("Amount in NGN:"));if(!Number.isFinite(amount)||amount<=0)return alert("Enter a valid amount.");return {desc:desc.trim(),amount,date:new Date().toLocaleDateString()}}
+
+function updateSaleTotal(){
+ const price=Number($("salePrice").value||0),qty=Number($("saleQty").value||0);
+ $("saleTotal").value=(price*qty).toFixed(2);
+}
+function refreshSaleProducts(){
+ const select=$("saleProduct");select.innerHTML='<option value="">Select product</option>';
+ data.products.forEach((product,index)=>{
+  const option=document.createElement("option");option.value=String(index);
+  option.textContent=product.name+" — Stock: "+product.qty;
+  option.disabled=Number(product.qty)<=0;select.appendChild(option);
+ });
+}
+function openSaleModal(){
+ if(!data.products.length)return alert("Please add a product before recording a sale.");
+ refreshSaleProducts();$("saleForm").reset();$("saleQty").value=1;
+ $("salePrice").value=0;$("saleTotal").value=0;
+ $("saleModal").classList.remove("hidden");
+}
+function closeSaleModal(){$("saleModal").classList.add("hidden");$("saleForm").reset()}
+$("addSale").onclick=openSaleModal;
+$("closeSaleModal").onclick=closeSaleModal;
+$("cancelSale").onclick=closeSaleModal;
+$("saleModal").onclick=e=>{if(e.target===$("saleModal"))closeSaleModal()};
+$("saleProduct").onchange=()=>{
+ const index=Number($("saleProduct").value),product=data.products[index];
+ $("salePrice").value=product?Number(product.price||0):0;
+ updateSaleTotal();
+};
+$("saleQty").oninput=updateSaleTotal;
+$("saleForm").onsubmit=e=>{
+ e.preventDefault();
+ const index=Number($("saleProduct").value),product=data.products[index];
+ const qty=Number($("saleQty").value),price=Number($("salePrice").value),amount=qty*price;
+ if(!product||!Number.isInteger(qty)||qty<1)return alert("Choose a product and enter a valid quantity.");
+ if(qty>Number(product.qty))return alert("Not enough stock. Available quantity: "+product.qty);
+ if(!Number.isFinite(amount)||amount<=0)return alert("The product selling price must be greater than zero.");
+ const customerName=$("saleCustomer").value.trim(),paymentMethod=$("salePayment").value;
+ if(paymentMethod==="Credit"){
+  if(!customerName)return alert("Enter the customer's name for a credit sale.");
+  if(!data.customers.some(c=>String(c.name).trim().toLowerCase()===customerName.toLowerCase()))return alert("Please add this customer in Customer Management before recording a credit sale.");
+ }
+ product.qty=Number(product.qty)-qty;
+ data.sales.push({
+  date:new Date().toLocaleDateString(),
+  desc:product.name,
+  productName:product.name,
+  productIndex:index,
+  qty,
+  unitPrice:price,
+  amount,
+  payment:paymentMethod,
+  customer:customerName
+ });
+ save();closeSaleModal();
+};
+
+
+function openExpenseModal(){
+ $("expenseForm").reset();
+ $("expenseDate").value=new Date().toISOString().slice(0,10);
+ $("expenseModal").classList.remove("hidden");
+}
+function closeExpenseModal(){$("expenseModal").classList.add("hidden");$("expenseForm").reset()}
+$("addExpense").onclick=openExpenseModal;
+$("closeExpenseModal").onclick=closeExpenseModal;
+$("cancelExpense").onclick=closeExpenseModal;
+$("expenseModal").onclick=e=>{if(e.target===$("expenseModal"))closeExpenseModal()};
+$("expenseForm").onsubmit=e=>{
+ e.preventDefault();
+ const amount=Number($("expenseAmount").value),desc=$("expenseDescription").value.trim();
+ if(!desc||!Number.isFinite(amount)||amount<=0)return alert("Enter a description and a valid amount.");
+ data.expenses.push({
+  date:$("expenseDate").value,
+  desc,
+  category:$("expenseCategory").value,
+  amount,
+  payment:$("expensePayment").value
+ });
+ save();closeExpenseModal();
+};
+
+function refreshCategorySelect(selected=""){
+ const select=$("pCategory");
+ select.innerHTML='<option value="">Select category</option>';
+ (data.categories||[]).forEach(category=>{
+  const option=document.createElement("option");option.value=category;option.textContent=category;
+  if(category===selected)option.selected=true;
+  select.appendChild(option);
+ });
+}
+function renderCategoryList(){
+ const list=$("categoryList");list.innerHTML="";
+ if(!(data.categories||[]).length){list.textContent="No categories yet. Add your first category above.";return}
+ data.categories.forEach((category,index)=>{
+  const row=document.createElement("div");
+  row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)";
+  const name=document.createElement("strong");name.textContent=category;
+  const remove=document.createElement("button");remove.type="button";remove.className="btn danger";remove.textContent="Delete";
+  remove.onclick=()=>{
+   const used=data.products.filter(product=>product.category===category).length;
+   const warning=used?" "+used+" product(s) using this category will become uncategorized.":"";
+   if(!confirm('Delete category "'+category+'"?'+warning))return;
+   data.products.forEach(product=>{if(product.category===category)product.category=""});
+   data.categories.splice(index,1);save();renderCategoryList();refreshCategorySelect();
+  };
+  row.append(name,remove);list.appendChild(row);
+ });
+}
+function openCategoryModal(){renderCategoryList();$("categoryModal").classList.remove("hidden");$("newCategoryName").focus()}
+$("manageCategories").onclick=openCategoryModal;
+$("closeCategoryModal").onclick=()=>$("categoryModal").classList.add("hidden");
+$("categoryModal").onclick=e=>{if(e.target===$("categoryModal"))$("categoryModal").classList.add("hidden")};
+$("addCategory").onclick=()=>{
+ const input=$("newCategoryName"),name=input.value.trim();
+ if(!name)return alert("Enter a category name.");
+ if(!Array.isArray(data.categories))data.categories=[];
+ if(data.categories.some(c=>c.toLowerCase()===name.toLowerCase()))return alert("This category already exists.");
+ data.categories.push(name);input.value="";save();renderCategoryList();refreshCategorySelect(name);
+};
+function openProductModal(){refreshCategorySelect();$("productModal").classList.remove("hidden");$("pName").focus()}
+function closeProductModal(){$("productModal").classList.add("hidden");$("productForm").reset();$("pAlert").value=2}
+$("addProduct").onclick=openProductModal;
+$("closeProductModal").onclick=closeProductModal;
+$("cancelProduct").onclick=closeProductModal;
+$("productModal").onclick=e=>{if(e.target===$("productModal"))closeProductModal()};
+$("productForm").onsubmit=e=>{e.preventDefault();const name=$("pName").value.trim(),qty=Number($("pQty").value),price=Number($("pPrice").value),cost=Number($("pCost").value||0),alertAt=Number($("pAlert").value||2);if(!name||!Number.isFinite(qty)||qty<0||!Number.isFinite(price)||price<0||!Number.isFinite(cost)||cost<0||!Number.isFinite(alertAt)||alertAt<0)return alert("Please enter valid product details.");data.products.push({name,category:$("pCategory").value,sku:$("pSku").value.trim(),qty,cost,price,alertAt,supplier:$("pSupplier").value.trim()});save();closeProductModal();};
+
+function openCustomerModal(){$("customerForm").reset();$("customerModal").classList.remove("hidden");$("customerName").focus()}
+function closeCustomerModal(){$("customerModal").classList.add("hidden");$("customerForm").reset()}
+$("addCustomer").onclick=openCustomerModal;
+$("closeCustomerModal").onclick=closeCustomerModal;
+$("cancelCustomer").onclick=closeCustomerModal;
+$("customerModal").onclick=e=>{if(e.target===$("customerModal"))closeCustomerModal()};
+$("customerForm").onsubmit=e=>{
+ e.preventDefault();
+ const name=$("customerName").value.trim(),phone=$("customerPhone").value.trim();
+ if(!name||!phone)return alert("Enter customer name and phone number.");
+ if(data.customers.some(c=>String(c.name).trim().toLowerCase()===name.toLowerCase()))return alert("This customer already exists.");
+ data.customers.push({name,phone,address:$("customerAddress").value.trim()});save();closeCustomerModal();
+};
+
+function openCustomerProfile(index){
+ const customer=data.customers[index];if(!customer)return;
+ const keyName=String(customer.name||"").trim().toLowerCase();
+ const sales=data.sales.filter(s=>String(s.customer||"").trim().toLowerCase()===keyName);
+ const payments=data.customerPayments.filter(p=>String(p.customer||"").trim().toLowerCase()===keyName);
+ const total=sales.reduce((sum,s)=>sum+Number(s.amount||0),0);
+ const credit=sales.filter(s=>s.payment==="Credit").reduce((sum,s)=>sum+Number(s.amount||0),0);
+ const paid=payments.reduce((sum,p)=>sum+Number(p.amount||0),0);
+ const balance=Math.max(0,credit-paid);
+ const saleRows=sales.length?sales.map(s=>`<tr><td>${esc(s.date||"—")}</td><td>${esc(s.desc||s.productName||"Sale")}</td><td>${s.qty??"—"}</td><td>${esc(s.payment||"—")}</td><td>${money(s.amount)}</td></tr>`).join(""):'<tr><td colspan="5" class="empty">No purchases recorded for this customer yet.</td></tr>';
+ const paymentRows=payments.length?payments.map(p=>`<tr><td>${esc(p.date||"—")}</td><td>${esc(p.payment||"—")}</td><td>${money(p.amount)}</td></tr>`).join(""):'<tr><td colspan="3" class="empty">No payments recorded yet.</td></tr>';
+ $("customerProfileTitle").textContent=customer.name;
+ $("customerProfileContent").innerHTML=`
+  <p class="muted">${esc(customer.phone||"No phone number")} · ${esc(customer.address||"No address")}</p>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr);margin:14px 0">
+   <div class="card"><small>Total purchases</small><strong>${money(total)}</strong></div>
+   <div class="card"><small>Credit sales</small><strong>${money(credit)}</strong></div>
+   <div class="card"><small>Payments received</small><strong>${money(paid)}</strong></div>
+   <div class="card"><small>Outstanding balance</small><strong>${money(balance)}</strong></div>
+  </div>
+  <h3>Purchase history</h3><div class="tablewrap"><table><thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Payment</th><th>Amount</th></tr></thead><tbody>${saleRows}</tbody></table></div>
+  <h3 style="margin-top:18px">Payment history</h3><div class="tablewrap"><table><thead><tr><th>Date</th><th>Method</th><th>Amount</th></tr></thead><tbody>${paymentRows}</tbody></table></div>
+  <div class="form-actions"><button class="btn secondary" type="button" onclick="document.getElementById('customerProfileModal').classList.add('hidden')">Close</button><button class="btn" type="button" onclick="recordCustomerPayment(${index})" ${balance<=0?"disabled":""}>Receive payment</button></div>`;
+ $("customerProfileModal").classList.remove("hidden");
+}
+$("closeCustomerProfile").onclick=()=>$("customerProfileModal").classList.add("hidden");
+$("customerProfileModal").onclick=e=>{if(e.target===$("customerProfileModal"))$("customerProfileModal").classList.add("hidden")};
+window.openCustomerProfile=openCustomerProfile;
+
+window.recordCustomerPayment=index=>{
+ const customer=data.customers[index];if(!customer)return;
+ const keyName=customer.name.trim().toLowerCase();
+ const credit=data.sales.filter(s=>String(s.customer||"").trim().toLowerCase()===keyName&&s.payment==="Credit").reduce((sum,s)=>sum+Number(s.amount||0),0);
+ const paid=data.customerPayments.filter(p=>String(p.customer||"").trim().toLowerCase()===keyName).reduce((sum,p)=>sum+Number(p.amount||0),0);
+ const balance=Math.max(0,credit-paid);
+ if(balance<=0)return alert("This customer has no outstanding debt.");
+ const amount=Number(prompt("Outstanding balance: "+money(balance)+"\\nEnter amount received:"));
+ if(!Number.isFinite(amount)||amount<=0)return;
+ if(amount>balance)return alert("Payment cannot be more than the outstanding balance.");
+ const method=prompt("Payment method: Cash, Transfer, or POS","Cash");
+ if(!method)return;
+ data.customerPayments.push({customer:customer.name,amount,date:new Date().toLocaleDateString(),payment:method});
+ save();
+ openCustomerProfile(index);
+};
+
+
+$("businessSettingsForm").onsubmit=e=>{
+ e.preventDefault();
+ const business=$("editBusinessName").value.trim(),owner=$("editOwnerName").value.trim(),email=$("editEmail").value.trim().toLowerCase();
+ if(!business||!owner||!email)return alert("Enter the business name, account owner and email.");
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return alert("Enter a valid email address.");
+ data.business=business;data.owner=owner;data.email=email;save();
+ alert("Business details saved.");
+};
+$("restoreBtn").onclick=()=>{
+ const file=$("restoreFile").files[0];
+ if(!file)return alert("Choose a JSON backup file first.");
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const restored=JSON.parse(reader.result);
+   if(!restored||typeof restored!=="object"||!restored.email||!restored.business||!Array.isArray(restored.products)||!Array.isArray(restored.sales)||!Array.isArray(restored.expenses)||!Array.isArray(restored.customers))throw new Error("invalid");
+   if(!confirm("Restore this backup? All current browser records will be replaced."))return;
+   data=restored;
+   if(!Array.isArray(data.categories))data.categories=["ABS Module","ABS Sensor","Brake Parts","Electronic Parts","Other"];
+   if(!Array.isArray(data.customerPayments))data.customerPayments=[];
+   save();$("restoreFile").value="";
+   alert("Backup restored successfully.");
+  }catch(err){alert("This file is not a valid SMART BUSINESS backup.");}
+ };
+ reader.readAsText(file);
+};
+$("exportBtn").onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="smart-business-data.json";a.click();URL.revokeObjectURL(a.href)};
+$("clearBtn").onclick=()=>{if(confirm("Delete all local demo business data on this device?")){localStorage.removeItem(key);data=null;showAuth()}};
+$("langBtn").onclick=()=>{lang=lang==="en"?"ha":"en";$("langBtn").textContent=lang==="en"?"Hausa":"English";alert(lang==="ha"?"Wannan samfurin gwaji ne. Ana ƙara fassarar Hausa a mataki na gaba.":"This is a prototype. Full language switching will be added next.")};
+if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+data=load();if(data){if(!Array.isArray(data.categories))data.categories=["ABS Module","ABS Sensor","Brake Parts","Electronic Parts","Other"];showApp()}else showAuth();
+</script></body></html>
