@@ -84,4 +84,23 @@ $("clearBtn").onclick=()=>{if(confirm("Delete all local demo business data on th
 $("langBtn").onclick=()=>{lang=lang==="en"?"ha":"en";$("langBtn").textContent=lang==="en"?"Hausa":"English";alert(lang==="ha"?"Wannan samfurin gwaji ne. Ana ƙara fassarar Hausa a mataki na gaba.":"This is a prototype. Full language switching will be added next.")};
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 data=load();if(data)showApp();else showAuth();
+// SUPABASE CONNECTION - ABS KANO LTD
+const SUPABASE_URL = "https://niaxkkjauympjwfndvdv.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3";
+
+let supabaseClient = null;
+
+import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
+  .then(({ createClient }) => {
+    supabaseClient = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+    console.log("ABS KANO Supabase client initialized");
+  })
+  .catch(error => {
+    console.error("Supabase initialization error:", error);
+  });
+
 </script></body></html>
