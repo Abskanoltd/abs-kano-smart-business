@@ -1,106 +1,192 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#142b49"><title>SMART BUSINESS</title>
-<link rel="manifest" href="manifest.webmanifest">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#142b49">
+<title>ABS KANO LTD | Smart Business</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--navy:#142b49;--blue:#2463a6;--bg:#f3f6fa;--ink:#182334;--muted:#718096;--line:#e5eaf1;--white:#fff;--green:#14845b;--red:#c43d48}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-header{background:var(--navy);color:white;padding:18px max(16px,calc((100% - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:12px;background:white;color:var(--navy);display:grid;place-items:center;font-weight:900;font-size:20px}
-.brand strong{display:block;letter-spacing:.5px}.brand small{color:#cbd8e8}.header-actions{display:flex;gap:8px;align-items:center}
-main{max-width:1120px;margin:24px auto;padding:0 16px}.auth{max-width:430px;margin:8vh auto;background:white;padding:26px;border-radius:18px;box-shadow:0 10px 35px #142b4914}
-h1,h2,h3,p{margin-top:0}.auth h1{font-size:25px}.muted{color:var(--muted);font-size:13px}
-label{display:block;font-size:13px;font-weight:650;margin:13px 0 6px}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}
-.btn{border:0;border-radius:10px;padding:11px 15px;background:var(--blue);color:white;font-weight:650}.btn.secondary{background:#eaf0f7;color:var(--navy)}.btn.danger{background:#fff0f0;color:var(--red)}.btn.full{width:100%;margin-top:16px}
-.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 3px 12px #172b4908}
-.metric small{color:var(--muted)}.metric strong{display:block;font-size:25px;margin-top:7px}.metric .symbol{font-size:20px;color:var(--blue)}
-.layout{display:grid;grid-template-columns:220px 1fr;gap:16px}.sidebar{background:white;border:1px solid var(--line);border-radius:15px;padding:10px;height:max-content}
-.nav{width:100%;border:0;background:transparent;text-align:left;padding:12px;border-radius:9px;color:#40516a;font-weight:600}.nav.active,.nav:hover{background:#edf3fa;color:var(--navy)}
-.content{min-width:0}.section{display:none}.section.active{display:block}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:650}
-.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.pill{font-size:11px;padding:4px 8px;border-radius:30px;background:#e8f6ef;color:var(--green)}
-.empty{padding:25px;text-align:center;color:var(--muted)}.notice{background:#fff8e8;border:1px solid #f2dfb3;padding:12px;border-radius:10px;color:#72551a;font-size:13px;margin-bottom:16px}
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;gap:4px}.nav{width:auto;white-space:nowrap}.row{grid-template-columns:1fr}main{margin:16px auto}}
-</style></head>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+header{background:var(--navy);color:#fff;padding:14px max(16px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
+.brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:12px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:900;font-size:19px}.brand strong{display:block}.brand small{color:#cbd8e8}
+.header-actions{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:650}.btn.secondary{background:#eaf0f7;color:var(--navy)}.btn.danger{background:#fff0f0;color:var(--red)}.btn:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1180px;margin:22px auto;padding:0 16px}.auth{max-width:440px;margin:8vh auto;background:#fff;padding:25px;border-radius:18px;box-shadow:0 10px 35px #142b4914}
+h1,h2,h3,p{margin-top:0}.muted{color:var(--muted);font-size:13px}label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}textarea{min-height:80px;resize:vertical}
+.layout{display:grid;grid-template-columns:205px 1fr;gap:16px}.sidebar{background:#fff;border:1px solid var(--line);border-radius:15px;padding:9px;height:max-content;position:sticky;top:85px}
+.nav{width:100%;border:0;background:transparent;text-align:left;padding:11px;border-radius:9px;color:#40516a;font-weight:600}.nav.active,.nav:hover{background:#edf3fa;color:var(--navy)}
+.content{min-width:0}.section{display:none}.section.active{display:block}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 3px 12px #172b4908}
+.metric small{color:var(--muted)}.metric strong{display:block;font-size:24px;margin-top:7px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:650}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.empty{padding:24px;text-align:center;color:var(--muted)}.notice{background:#fff8e8;border:1px solid #f2dfb3;padding:12px;border-radius:10px;color:#72551a;font-size:13px;margin-bottom:15px}
+.status{font-size:11px;padding:4px 8px;border-radius:30px;background:#e8f6ef;color:var(--green)}.dangertext{color:var(--red)}.thumb{width:38px;height:38px;object-fit:cover;border-radius:7px;background:#edf1f5}
+.modal{position:fixed;inset:0;background:#0d1c2dcc;display:grid;place-items:center;padding:16px;z-index:10}.modalbox{background:#fff;border-radius:16px;padding:20px;width:min(560px,100%);max-height:90vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#142b49;color:#fff;padding:11px 16px;border-radius:10px;z-index:20;max-width:90%;box-shadow:0 5px 20px #0003}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;gap:3px;position:static}.nav{width:auto;white-space:nowrap}.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}main{margin:15px auto}.brand small{font-size:11px}}
+</style>
+</head>
 <body>
-<header><div class="brand"><div class="logo">SB</div><div><strong>SMART BUSINESS</strong><small>Powered by ABS KANO LTD</small></div></div><div class="header-actions"><button class="btn secondary" id="langBtn">Hausa</button><button class="btn secondary hidden" id="logoutBtn">Log out</button></div></header>
+<header>
+ <div class="brand"><div class="logo">AK</div><div><strong>ABS KANO LTD</strong><small>Smart Business App</small></div></div>
+ <div class="header-actions"><button class="btn secondary" id="langBtn">Hausa</button><button class="btn secondary hidden" id="logoutBtn">Log out</button></div>
+</header>
 <main>
 <section id="authView" class="auth">
-<h1 id="authTitle">Create your business account</h1><p class="muted">Manage sales, stock, expenses and customers in one place.</p>
-<div id="registerFields"><label>Business name</label><input id="businessName" placeholder="e.g. My Store"><label>Your name</label><input id="ownerName" placeholder="Full name"></div>
-<label>Email</label><input id="email" type="email" placeholder="you@example.com">
-<label>Password</label><input id="password" type="password" placeholder="At least 8 characters">
-<button class="btn full" id="authSubmit">Create account</button>
-<p class="muted" style="margin:16px 0 0;text-align:center"><span id="switchText">Already registered?</span> <a href="#" id="switchAuth">Log in</a></p>
-<p class="muted" style="margin:12px 0 0">Prototype only: account details are stored on this device. Do not use real passwords or sensitive business data.</p>
+ <h1>Welcome back</h1><p class="muted">Sign in with your ABS KANO LTD owner account.</p>
+ <label>Email</label><input id="email" type="email" autocomplete="username" placeholder="Business email">
+ <label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password">
+ <button class="btn" style="width:100%;margin-top:16px" id="loginBtn">Sign in</button>
+ <p class="muted" style="margin:14px 0 0">The owner account must already exist in Supabase Authentication. Public sign-up is disabled in this app.</p>
 </section>
 <section id="appView" class="hidden">
-<div class="topline"><div><h1 id="welcome">Business dashboard</h1><p class="muted" id="businessLabel">Your business at a glance</p></div><span class="pill">Starter workspace</span></div>
-<div class="notice">This is the first working prototype. Data is saved in this browser only; secure cloud accounts and multi-device sync will be connected in the next development stage.</div>
-<div class="layout"><aside class="sidebar">
-<button class="nav active" data-section="overview">▦ Overview</button><button class="nav" data-section="sales">＋ Sales</button><button class="nav" data-section="products">▣ Products</button><button class="nav" data-section="expenses">↘ Expenses</button><button class="nav" data-section="customers">♙ Customers</button><button class="nav" data-section="reports">▤ Reports</button><button class="nav" data-section="settings">⚙ Settings</button>
-</aside><div class="content">
-<section class="section active" id="overview"><div class="grid">
-<div class="card metric"><small>Total sales</small><strong id="totalSales">₦0</strong></div><div class="card metric"><small>Total expenses</small><strong id="totalExpenses">₦0</strong></div><div class="card metric"><small>Estimated profit*</small><strong id="profit">₦0</strong></div><div class="card metric"><small>Products</small><strong id="productCount">0</strong></div></div>
-<div class="card" style="margin-top:15px"><h3>Recent activity</h3><div id="recent" class="empty">No transactions yet. Add your first sale or expense.</div></div><p class="muted" style="margin-top:10px">*Profit shown here is sales minus recorded expenses; cost-of-goods accounting will be added in the full version.</p></section>
-<section class="section" id="sales"><div class="topline"><h2>Sales</h2><button class="btn" id="addSale">＋ Record sale</button></div><div class="card tablewrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody id="salesRows"></tbody></table><div id="salesEmpty" class="empty">No sales recorded.</div></div></section>
-<section class="section" id="products"><div class="topline"><h2>Products & stock</h2><button class="btn" id="addProduct">＋ Add product</button></div><div class="card tablewrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Quantity</th><th>Selling price</th></tr></thead><tbody id="productRows"></tbody></table><div id="productsEmpty" class="empty">No products added.</div></div></section>
-<section class="section" id="expenses"><div class="topline"><h2>Expenses</h2><button class="btn" id="addExpense">＋ Record expense</button></div><div class="card tablewrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody id="expenseRows"></tbody></table><div id="expensesEmpty" class="empty">No expenses recorded.</div></div></section>
-<section class="section" id="customers"><div class="topline"><h2>Customers</h2><button class="btn" id="addCustomer">＋ Add customer</button></div><div class="card tablewrap"><table><thead><tr><th>Name</th><th>Phone</th></tr></thead><tbody id="customerRows"></tbody></table><div id="customersEmpty" class="empty">No customers added.</div></div></section>
-<section class="section" id="reports"><h2>Business summary</h2><div class="card"><p>Sales: <strong id="reportSales">₦0</strong></p><p>Expenses: <strong id="reportExpenses">₦0</strong></p><p>Net (sales − expenses): <strong id="reportNet">₦0</strong></p><button class="btn secondary" id="exportBtn">Download my data (JSON)</button></div></section>
-<section class="section" id="settings"><h2>Business settings</h2><div class="card"><p><strong id="settingsBusiness"></strong></p><p class="muted">Account owner: <span id="settingsOwner"></span></p><p class="muted">Currency: Nigerian Naira (NGN)</p><button class="btn danger" id="clearBtn">Clear local demo data</button></div></section>
-</div></div></section></main>
+ <div class="topline"><div><h1 id="welcome">Business dashboard</h1><p class="muted" id="businessLabel">ABS KANO LTD</p></div><span class="status">Cloud database connected</span></div>
+ <div class="notice">Owner-only workspace. This app uses Supabase; it does not save business records in localStorage. Product images are currently stored as image URLs. Create the SQL migration supplied with this file before using Sales and image fields.</div>
+ <div class="layout">
+  <aside class="sidebar">
+   <button class="nav active" data-section="overview">▦ Overview</button>
+   <button class="nav" data-section="products">▣ Products</button>
+   <button class="nav" data-section="categories">▤ Categories</button>
+   <button class="nav" data-section="sales">＋ Sales</button>
+   <button class="nav" data-section="purchases">↗ Purchases</button>
+   <button class="nav" data-section="customers">♙ Customers</button>
+   <button class="nav" data-section="suppliers">♧ Suppliers</button>
+   <button class="nav" data-section="expenses">↘ Expenses</button>
+   <button class="nav" data-section="reports">▥ Reports</button>
+   <button class="nav" data-section="settings">⚙ Settings</button>
+  </aside>
+  <div class="content">
+   <section class="section active" id="overview">
+    <div class="grid">
+     <div class="card metric"><small>Total sales</small><strong id="mSales">₦0</strong></div>
+     <div class="card metric"><small>Total expenses</small><strong id="mExpenses">₦0</strong></div>
+     <div class="card metric"><small>Products</small><strong id="mProducts">0</strong></div>
+     <div class="card metric"><small>Low stock</small><strong id="mLow">0</strong></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h3>Low stock products</h3><div id="lowList" class="empty">No low-stock products.</div></div>
+   </section>
+   <section class="section" id="products">
+    <div class="topline"><h2>Products & stock</h2><button class="btn" id="newProduct">＋ Add product</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Photo</th><th>Product</th><th>SKU</th><th>Category</th><th>Qty</th><th>Cost</th><th>Selling</th><th>Actions</th></tr></thead><tbody id="productRows"></tbody></table><div id="productEmpty" class="empty">No products yet.</div></div>
+   </section>
+   <section class="section" id="categories">
+    <div class="topline"><h2>Categories</h2><button class="btn" id="newCategory">＋ Add category</button></div>
+    <div class="notice">Categories can be added or deleted. Renaming is intentionally unavailable. Deleting a category first unassigns its products; products will not be deleted.</div>
+    <div class="card tablewrap"><table><thead><tr><th>Category name</th><th>Created</th><th>Action</th></tr></thead><tbody id="categoryRows"></tbody></table><div id="categoryEmpty" class="empty">No categories yet.</div></div>
+   </section>
+   <section class="section" id="sales">
+    <div class="topline"><h2>Sales</h2><button class="btn" id="newSale">＋ Record sale</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Date</th><th>Product / details</th><th>Qty</th><th>Amount</th></tr></thead><tbody id="saleRows"></tbody></table><div id="saleEmpty" class="empty">No sales recorded.</div></div>
+   </section>
+   <section class="section" id="purchases">
+    <div class="topline"><h2>Purchases</h2><button class="btn" id="newPurchase">＋ Record purchase</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Total amount</th></tr></thead><tbody id="purchaseRows"></tbody></table><div id="purchaseEmpty" class="empty">No purchases recorded.</div></div>
+   </section>
+   <section class="section" id="customers">
+    <div class="topline"><h2>Customers</h2><button class="btn" id="newCustomer">＋ Add customer</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Address</th></tr></thead><tbody id="customerRows"></tbody></table><div id="customerEmpty" class="empty">No customers yet.</div></div>
+   </section>
+   <section class="section" id="suppliers">
+    <div class="topline"><h2>Suppliers</h2><button class="btn" id="newSupplier">＋ Add supplier</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Address</th></tr></thead><tbody id="supplierRows"></tbody></table><div id="supplierEmpty" class="empty">No suppliers yet.</div></div>
+   </section>
+   <section class="section" id="expenses">
+    <div class="topline"><h2>Expenses</h2><button class="btn" id="newExpense">＋ Record expense</button></div>
+    <div class="card tablewrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody id="expenseRows"></tbody></table><div id="expenseEmpty" class="empty">No expenses recorded.</div></div>
+   </section>
+   <section class="section" id="reports">
+    <h2>Business reports</h2><div class="card"><p>Total sales: <strong id="rSales">₦0</strong></p><p>Total expenses: <strong id="rExpenses">₦0</strong></p><p>Net cash result: <strong id="rNet">₦0</strong></p><button class="btn secondary" id="refreshBtn">Refresh data</button></div>
+   </section>
+   <section class="section" id="settings">
+    <h2>Business settings</h2><div class="card"><label>Business name</label><input id="businessName"><label>Phone</label><input id="businessPhone"><label>Address</label><textarea id="businessAddress"></textarea><label>Currency</label><select id="businessCurrency"><option value="NGN">Nigerian Naira (NGN)</option></select><button class="btn" id="saveSettings" style="margin-top:14px">Save settings</button><p class="muted" id="ownerEmail" style="margin-top:14px"></p></div>
+   </section>
+  </div>
+ </div>
+</section>
+</main>
+<div id="modal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3 id="modalTitle">Add</h3><button class="btn secondary" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="hidden"></div>
 <script>
-const $=id=>document.getElementById(id);let mode="register",lang="en",data=null;
-const key="smartBusinessPrototype_v1";
-const money=n=>"₦"+Number(n||0).toLocaleString("en-NG",{maximumFractionDigits:2});
-function save(){localStorage.setItem(key,JSON.stringify(data));render()}
-function load(){try{return JSON.parse(localStorage.getItem(key))}catch{return null}}
-function showAuth(){ $("authView").classList.remove("hidden");$("appView").classList.add("hidden");$("logoutBtn").classList.add("hidden")}
-function showApp(){ $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");render()}
-function authMode(){mode=mode==="register"?"login":"register";$("registerFields").classList.toggle("hidden",mode==="login");$("authTitle").textContent=mode==="register"?"Create your business account":"Log in to SMART BUSINESS";$("authSubmit").textContent=mode==="register"?"Create account":"Log in";$("switchText").textContent=mode==="register"?"Already registered?":"New to SMART BUSINESS?";$("switchAuth").textContent=mode==="register"?"Log in":"Create account"}
-$("switchAuth").onclick=e=>{e.preventDefault();authMode()};
-$("authSubmit").onclick=()=>{const email=$("email").value.trim().toLowerCase(),pass=$("password").value;if(!email||pass.length<8)return alert("Enter a valid email and a password of at least 8 characters.");if(mode==="register"){const business=$("businessName").value.trim(),owner=$("ownerName").value.trim();if(!business||!owner)return alert("Enter your business name and your name.");data={email,business,owner,sales:[],expenses:[],products:[],customers:[]};save();showApp()}else{data=load();if(!data||data.email!==email)return alert("No matching local demo account found. Register on this device first.");showApp()}};
-$("logoutBtn").onclick=()=>{data=null;showAuth()};
-document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(b.dataset.section).classList.add("active")});
-function rows(id,arr,fn){$(id).innerHTML=arr.map(fn).join("")}
-function render(){if(!data)return;let s=data.sales.reduce((a,x)=>a+Number(x.amount),0),e=data.expenses.reduce((a,x)=>a+Number(x.amount),0);$("welcome").textContent="Welcome, "+data.owner;$("businessLabel").textContent=data.business;$("totalSales").textContent=money(s);$("totalExpenses").textContent=money(e);$("profit").textContent=money(s-e);$("productCount").textContent=data.products.length;$("reportSales").textContent=money(s);$("reportExpenses").textContent=money(e);$("reportNet").textContent=money(s-e);$("settingsBusiness").textContent=data.business;$("settingsOwner").textContent=data.owner;
-rows("salesRows",data.sales,x=>`<tr><td>${x.date}</td><td>${esc(x.desc)}</td><td>${money(x.amount)}</td></tr>`);$("salesEmpty").classList.toggle("hidden",data.sales.length>0);
-rows("expenseRows",data.expenses,x=>`<tr><td>${x.date}</td><td>${esc(x.desc)}</td><td>${money(x.amount)}</td></tr>`);$("expensesEmpty").classList.toggle("hidden",data.expenses.length>0);
-rows("productRows",data.products,x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.sku)}</td><td>${x.qty}</td><td>${money(x.price)}</td></tr>`);$("productsEmpty").classList.toggle("hidden",data.products.length>0);
-rows("customerRows",data.customers,x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td></tr>`);$("customersEmpty").classList.toggle("hidden",data.customers.length>0);
-let recent=[...data.sales.map(x=>({...x,type:"Sale"})),...data.expenses.map(x=>({...x,type:"Expense"}))].slice(-5).reverse();$("recent").innerHTML=recent.length?recent.map(x=>`<p>${x.type}: ${esc(x.desc)} — ${money(x.amount)}</p>`).join(""):"No transactions yet. Add your first sale or expense."}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function askAmount(label){let desc=prompt(label+" description:");if(desc===null||!desc.trim())return;let amount=Number(prompt("Amount in NGN:"));if(!Number.isFinite(amount)||amount<=0)return alert("Enter a valid amount.");return {desc:desc.trim(),amount,date:new Date().toLocaleDateString()}}
-$("addSale").onclick=()=>{let x=askAmount("Sale");if(x){data.sales.push(x);save()}};
-$("addExpense").onclick=()=>{let x=askAmount("Expense");if(x){data.expenses.push(x);save()}};
-$("addProduct").onclick=()=>{let name=prompt("Product name:");if(!name)return;let sku=prompt("SKU (optional):")||"",qty=Number(prompt("Quantity:")),price=Number(prompt("Selling price:"));if(!Number.isFinite(qty)||qty<0||!Number.isFinite(price)||price<0)return alert("Enter valid quantity and price.");data.products.push({name,sku,qty,price});save()};
-$("addCustomer").onclick=()=>{let name=prompt("Customer name:");if(!name)return;let phone=prompt("Phone number:")||"";data.customers.push({name,phone});save()};
-$("exportBtn").onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="smart-business-data.json";a.click();URL.revokeObjectURL(a.href)};
-$("clearBtn").onclick=()=>{if(confirm("Delete all local demo business data on this device?")){localStorage.removeItem(key);data=null;showAuth()}};
-$("langBtn").onclick=()=>{lang=lang==="en"?"ha":"en";$("langBtn").textContent=lang==="en"?"Hausa":"English";alert(lang==="ha"?"Wannan samfurin gwaji ne. Ana ƙara fassarar Hausa a mataki na gaba.":"This is a prototype. Full language switching will be added next.")};
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-data=load();if(data)showApp();else showAuth();
-// SUPABASE CONNECTION - ABS KANO LTD
-const SUPABASE_URL = "https://niaxkkjauympjwfndvdv.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3";
-
-let supabaseClient = null;
-
-import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
-  .then(({ createClient }) => {
-    supabaseClient = createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
-    console.log("ABS KANO Supabase client initialized");
-  })
-  .catch(error => {
-    console.error("Supabase initialization error:", error);
-  });
-
-</script></body></html>
+(() => {
+'use strict';
+const SUPABASE_URL = 'https://niaxkkjauympjwfndvdv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3';
+const OWNER_EMAIL = 'abskanoltd@gmail.com';
+const $ = id => document.getElementById(id);
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let user = null, lang = 'en';
+let cache = {products:[],categories:[],sales:[],purchases:[],customers:[],suppliers:[],expenses:[],settings:null};
+const money = n => '₦' + Number(n || 0).toLocaleString('en-NG',{maximumFractionDigits:2});
+const today = () => new Date().toISOString().slice(0,10);
+function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showAuth(){$('authView').classList.remove('hidden');$('appView').classList.add('hidden');$('logoutBtn').classList.add('hidden')}
+function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden');$('logoutBtn').classList.remove('hidden')}
+function switchSection(id){document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.section===id));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id))}
+document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>switchSection(b.dataset.section)));
+async function query(table,opts={}){let q=client.from(table).select('*');if(opts.order)q=q.order(opts.order,{ascending:opts.ascending??false});const {data,error}=await q;if(error)throw error;return data||[]}
+async function loadAll(){
+ const names=['products','categories','sales','purchases','customers','suppliers','expenses'];
+ const results=await Promise.all(names.map(n=>query(n,{order:n==='categories'?'name':(n==='products'?'name':'created_at')})));
+ names.forEach((n,i)=>cache[n]=results[i]);
+ const {data:settings,error}=await client.from('business_settings').select('*').limit(1).maybeSingle();
+ if(error)throw error;cache.settings=settings;
+ render();
+}
+function render(){
+ const s=cache.sales.reduce((a,x)=>a+Number(x.total_amount||0),0),e=cache.expenses.reduce((a,x)=>a+Number(x.amount||0),0);
+ $('mSales').textContent=money(s);$('mExpenses').textContent=money(e);$('mProducts').textContent=cache.products.length;
+ const low=cache.products.filter(p=>Number(p.quantity||0)<=Number(p.low_stock_limit||0));$('mLow').textContent=low.length;
+ $('lowList').innerHTML=low.length?low.map(p=>`<p>${esc(p.name)} — ${Number(p.quantity||0)} left</p>`).join(''):'No low-stock products.';
+ $('rSales').textContent=money(s);$('rExpenses').textContent=money(e);$('rNet').textContent=money(s-e);
+ fill('productRows',cache.products,p=>{const c=cache.categories.find(x=>x.id===p.category_id);return `<tr><td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}" alt="">`:'—'}</td><td>${esc(p.name)}</td><td>${esc(p.sku||'')}</td><td>${esc(c?.name||'Uncategorized')}</td><td>${Number(p.quantity||0)}</td><td>${money(p.cost_price)}</td><td>${money(p.selling_price)}</td><td><button class="btn secondary" data-edit-product="${p.id}">Edit</button> <button class="btn danger" data-del-product="${p.id}">Delete</button></td></tr>`});
+ fill('categoryRows',cache.categories,c=>`<tr><td>${esc(c.name)}</td><td>${c.created_at?new Date(c.created_at).toLocaleDateString():''}</td><td><button class="btn danger" data-del-category="${c.id}">Delete</button></td></tr>`);
+ fill('saleRows',cache.sales,s=>`<tr><td>${esc((s.sale_date||s.created_at||'').slice(0,10))}</td><td>${esc(s.description||s.product_name||'Sale')}</td><td>${Number(s.quantity||0)}</td><td>${money(s.total_amount)}</td></tr>`);
+ fill('purchaseRows',cache.purchases,p=>{const sp=cache.suppliers.find(x=>x.id===p.supplier_id);return `<tr><td>${esc((p.purchase_date||'').slice(0,10))}</td><td>${esc(sp?.name||'—')}</td><td>${money(p.total_amount)}</td></tr>`});
+ fill('customerRows',cache.customers,c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone||'')}</td><td>${esc(c.address||'')}</td></tr>`);
+ fill('supplierRows',cache.suppliers,c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone||'')}</td><td>${esc(c.address||'')}</td></tr>`);
+ fill('expenseRows',cache.expenses,x=>`<tr><td>${esc((x.expense_date||x.created_at||'').slice(0,10))}</td><td>${esc(x.description)}</td><td>${money(x.amount)}</td></tr>`);
+ const st=cache.settings||{};$('businessName').value=st.business_name||'ABS KANO LTD';$('businessPhone').value=st.phone||'';$('businessAddress').value=st.address||'';$('businessCurrency').value=st.currency||'NGN';$('businessLabel').textContent=st.business_name||'ABS KANO LTD';$('welcome').textContent='Welcome to '+(st.business_name||'ABS KANO LTD');$('ownerEmail').textContent='Signed in as '+(user?.email||'');
+}
+function fill(id,arr,fn){$(id).innerHTML=arr.map(fn).join('');const empty=$(id.replace('Rows','Empty'));if(empty)empty.classList.toggle('hidden',arr.length>0)}
+function openModal(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modal').classList.remove('hidden')}
+function closeModal(){$('modal').classList.add('hidden');$('modalBody').innerHTML=''}
+$('closeModal').onclick=closeModal;
+async function saveRow(table,payload,id=null){let res=id?await client.from(table).update(payload).eq('id',id):await client.from(table).insert(payload);if(res.error)throw res.error;await loadAll();closeModal();toast('Saved successfully')}
+function formField(label,name,type='text',value='',required=false){return `<label>${label}</label><input name="${name}" type="${type}" value="${esc(value)}" ${required?'required':''}>`}
+function productForm(p={}){openModal(p.id?'Edit product':'Add product',`<form id="productForm"><div class="formgrid">
+${formField('Product name','name','text',p.name||'',true)}
+${formField('SKU / Part number','sku','text',p.sku||'')}
+<label>Category</label><select name="category_id"><option value="">Uncategorized</option>${cache.categories.map(c=>`<option value="${c.id}" ${p.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+${formField('Quantity','quantity','number',p.quantity??0,true)}
+${formField('Low stock alert','low_stock_limit','number',p.low_stock_limit??2)}
+${formField('Cost price (₦)','cost_price','number',p.cost_price??0)}
+${formField('Selling price (₦)','selling_price','number',p.selling_price??0)}
+${formField('Product image URL','image_url','url',p.image_url||'')}
+</div><button class="btn" style="margin-top:15px">Save product</button></form>`);
+ $('productForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const payload={name:f.get('name').trim(),sku:f.get('sku')||null,category_id:f.get('category_id')||null,quantity:Number(f.get('quantity')||0),low_stock_limit:Number(f.get('low_stock_limit')||0),cost_price:Number(f.get('cost_price')||0),selling_price:Number(f.get('selling_price')||0),image_url:f.get('image_url')||null};try{await saveRow('products',payload,p.id)}catch(err){toast('Save failed: '+err.message)}};
+}
+$('newProduct').onclick=()=>productForm();
+$('productRows').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-product]'),del=e.target.closest('[data-del-product]');if(edit){const p=cache.products.find(x=>x.id===edit.dataset.editProduct);if(p)productForm(p)}if(del&&confirm('Delete this product?')){const {error}=await client.from('products').delete().eq('id',del.dataset.delProduct);if(error)toast(error.message);else{await loadAll();toast('Product deleted')}}});
+$('newCategory').onclick=()=>{openModal('Add category',`<form id="categoryForm">${formField('Category name','name','text','',true)}<button class="btn" style="margin-top:15px">Save category</button></form>`);$('categoryForm').onsubmit=async e=>{e.preventDefault();try{await saveRow('categories',{name:new FormData(e.target).get('name').trim()})}catch(err){toast('Save failed: '+err.message)}}};
+$('categoryRows').addEventListener('click',async e=>{const b=e.target.closest('[data-del-category]');if(!b||!confirm('Delete this category? Products in it will become Uncategorized.'))return;try{const id=b.dataset.delCategory;let r=await client.from('products').update({category_id:null}).eq('category_id',id);if(r.error)throw r.error;r=await client.from('categories').delete().eq('id',id);if(r.error)throw r.error;await loadAll();toast('Category deleted; products kept')}catch(err){toast('Delete failed: '+err.message)}});
+function simpleForm(title,fields,table){openModal(title,`<form id="simpleForm"><div class="formgrid">${fields}</div><button class="btn" style="margin-top:15px">Save</button></form>`);$('simpleForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),payload={};for(const [k,v] of f.entries())payload[k]=v===''?null:v;try{await saveRow(table,payload)}catch(err){toast('Save failed: '+err.message)}}}
+$('newCustomer').onclick=()=>simpleForm('Add customer',formField('Customer name','name','text','',true)+formField('Phone','phone')+`<label>Address</label><textarea name="address"></textarea>`,'customers');
+$('newSupplier').onclick=()=>simpleForm('Add supplier',formField('Supplier name','name','text','',true)+formField('Phone','phone')+`<label>Address</label><textarea name="address"></textarea>`,'suppliers');
+$('newExpense').onclick=()=>simpleForm('Record expense',formField('Description','description','text','',true)+formField('Amount (₦)','amount','number','',true)+formField('Expense date','expense_date','date',today()),'expenses');
+$('newPurchase').onclick=()=>{const opts=cache.suppliers.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');simpleForm('Record purchase',`<label>Supplier</label><select name="supplier_id"><option value="">No supplier selected</option>${opts}</select>${formField('Total amount (₦)','total_amount','number','',true)}${formField('Purchase date','purchase_date','date',today())}`,'purchases')};
+$('newSale').onclick=()=>{const opts=cache.products.map(p=>`<option value="${p.id}" data-price="${Number(p.selling_price||0)}" data-qty="${Number(p.quantity||0)}">${esc(p.name)} (stock: ${Number(p.quantity||0)})</option>`).join('');openModal('Record sale',`<form id="saleForm"><label>Product</label><select name="product_id" id="saleProduct" required><option value="">Choose product</option>${opts}</select>${formField('Quantity','quantity','number','1',true)}${formField('Unit selling price (₦)','unit_price','number','',true)}${formField('Sale date','sale_date','date',today())}${formField('Description (optional)','description')}<button class="btn" style="margin-top:15px">Save sale</button></form>`);$('saleProduct').onchange=e=>{$('saleForm').elements.unit_price.value=e.target.selectedOptions[0]?.dataset.price||''};$('saleForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),product=cache.products.find(p=>p.id===f.get('product_id')),qty=Number(f.get('quantity')),price=Number(f.get('unit_price'));if(!product||qty<=0||qty>Number(product.quantity||0)){toast('Invalid quantity or insufficient stock');return}const total=qty*price;try{const {error}=await client.from('sales').insert({product_id:product.id,product_name:product.name,description:f.get('description')||product.name,quantity:qty,unit_price:price,total_amount:total,sale_date:f.get('sale_date')||today()});if(error)throw error;const upd=await client.from('products').update({quantity:Number(product.quantity)-qty}).eq('id',product.id);if(upd.error)throw upd.error;await loadAll();closeModal();toast('Sale recorded and stock updated')}catch(err){toast('Sale error: '+err.message+' — check stock and sales permissions')}}};
+$('saveSettings').onclick=async()=>{const payload={business_name:$('businessName').value.trim(),phone:$('businessPhone').value.trim()||null,address:$('businessAddress').value.trim()||null,currency:$('businessCurrency').value};try{if(cache.settings){const {error}=await client.from('business_settings').update(payload).eq('id',cache.settings.id);if(error)throw error}else{const {error}=await client.from('business_settings').insert(payload);if(error)throw error}await loadAll();toast('Business settings saved')}catch(err){toast('Settings error: '+err.message)}};
+$('refreshBtn').onclick=async()=>{try{await loadAll();toast('Data refreshed')}catch(e){toast(e.message)}};
+$('loginBtn').onclick=async()=>{const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!password){toast('Enter email and password');return}if(email!==OWNER_EMAIL){toast('This workspace is reserved for the owner account');return}const {data,error}=await client.auth.signInWithPassword({email,password});if(error){toast(error.message);return}user=data.user;await startApp()};
+$('logoutBtn').onclick=async()=>{await client.auth.signOut();user=null;showAuth()};
+async function startApp(){if(!user||user.email?.toLowerCase()!==OWNER_EMAIL){await client.auth.signOut();showAuth();toast('Owner account only');return}showApp();try{await loadAll()}catch(err){toast('Database error: '+err.message+'. Check SQL migration and RLS policies.')}}
+$('langBtn').onclick=()=>{lang=lang==='en'?'ha':'en';$('langBtn').textContent=lang==='en'?'Hausa':'English';toast(lang==='ha'?'An kunna yanayin Hausa; wasu sunayen sashe har yanzu suna Turanci.':'English mode selected')};
+client.auth.getSession().then(({data})=>{user=data.session?.user||null;if(user)startApp();else showAuth()});
+client.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;if(!user)showAuth()});
+})();
+</script>
+</body>
+</html>
