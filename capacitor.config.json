@@ -1,7 +1,7 @@
 {
   "appId": "com.abskanoltd.smartbusiness",
   "appName": "ABS KANO LTD Smart Business",
-  "webDir": ".",
+ "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"
