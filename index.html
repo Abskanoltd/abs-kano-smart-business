@@ -81,5 +81,49 @@ async function loadMarketplace(){const g=$('marketGrid');g.innerHTML='<p class="
 async function loadAdmin(){if(user.id!==SUPER)return;const r=await db.from('businesses').select('id,owner_id,business_name,is_public,created_at').order('created_at',{ascending:false});if(r.error){toast('Admin view: '+r.error.message);return}const arr=r.data||[];$('adminBusinesses').textContent=arr.length;$('adminPublic').textContent=arr.filter(x=>x.is_public).length;table('adminRows',arr.map(x=>`<tr><td>${esc(x.business_name)}</td><td>${esc(x.owner_id)}</td><td>${x.is_public?'Yes':'No'}</td><td>${esc((x.created_at||'').slice(0,10))}</td></tr>`).join(''))}
 $('loginForm').onsubmit=async e=>{e.preventDefault();const submit=e.target.querySelector('button[type="submit"],button:not([type])');if(submit){submit.disabled=true;submit.textContent='Signing in…'}$('authDesc').textContent='Signing in…';$('authDesc').style.color='';try{const r=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(r.error)throw r.error;user=r.data.user;await startApp()}catch(err){$('authDesc').textContent='Sign-in error: '+String(err?.message||err);$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business sign-in error:',err)}finally{if(submit){submit.disabled=false;submit.textContent='Sign in'}}};
 async function startApp(){try{if(!user)throw new Error('Please sign in');$('connectionStatus').textContent='Connecting…';await getBusiness();showApp();$('adminNav').classList.toggle('hidden',user.id!==SUPER);await loadAll();$('connectionStatus').textContent='Database connected';if(user.id===SUPER)await loadAdmin()}catch(e){const msg=String(e?.message||e||'Unknown error');$('connectionStatus').textContent='Connection issue';showAuth();$('authDesc').textContent='Sign-in succeeded, but the business data could not load: '+msg;$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business startup error:',e)}}
+/* Logout and Hausa/English interface controls */
+const languagePairs={
+'Overview':'Taƙaitaccen bayani','Products':'Kayayyaki','Categories':'Rukunai','Sales':'Tallace-tallace','Purchases':'Sayayya','Customers':'Abokan ciniki','Suppliers':'Masu kaya','Expenses':'Kuɗaɗen kashewa','Receipts':'Rasidu','Public Sells':'Kasuwar jama’a','Reports':'Rahotanni','Settings':'Saituna','Super Admin':'Babban Mai Gudanarwa',
+'Welcome':'Barka da zuwa','Business dashboard':'Allon kula da kasuwanci','Sign in':'Shiga','Create account':'Buɗe asusu','Log out':'Fita','Email':'Imel','Password':'Kalmar sirri','Your name':'Sunanka','Business / shop name':'Sunan kasuwanci / shago','Password (at least 8 characters)':'Kalmar sirri (aƙalla haruffa 8)','A separate business workspace will be created for your account.':'Za a ƙirƙiri keɓaɓɓen wurin kasuwanci don asusunka.',
+'Database connected':'An haɗa da ma’ajiyar bayanai','Connecting…':'Ana haɗawa…','Connection issue':'Matsalar haɗi','Checking connection…':'Ana duba haɗi…',
+'Add product':'Ƙara kaya','Save':'Ajiye','Cancel':'Soke','Close':'Rufe','Edit':'Gyara','Delete':'Goge','Search':'Nema','Name':'Suna','Phone':'Lambar waya','Address':'Adireshi','Business Name':'Sunan kasuwanci','Quantity':'Adadi','Cost Price':'Farashin saye','Selling Price':'Farashin sayarwa','No records found.':'Ba a sami bayanai ba.','No products have been published yet.':'Ba a wallafa kaya ba tukuna.',
+'Record purchase':'Yi rijistar sayayya','Complete purchase and create receipt':'Kammala sayayya kuma ƙirƙiri rasidi','Print / Save PDF':'Buga / Ajiye PDF','Share WhatsApp':'Aika ta WhatsApp','THANK YOU FOR YOUR PATRONAGE!':'MUN GODE DA KASUWANCINKA!'
+};
+const originalTextNodes=new Map();
+function applyLanguage(){
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+ let node;
+ while((node=walker.nextNode())){
+   if(!originalTextNodes.has(node))originalTextNodes.set(node,node.nodeValue);
+   const original=originalTextNodes.get(node);
+   const trimmed=original.trim();
+   if(!trimmed)continue;
+   const translated=languagePairs[trimmed];
+   if(lang==='ha'&&translated)node.nodeValue=original.replace(trimmed,translated);
+   else node.nodeValue=original;
+ }
+ document.documentElement.lang=lang==='ha'?'ha':'en';
+ $('languageBtn').textContent=lang==='ha'?'English':'Hausa';
+}
+$('languageBtn').addEventListener('click',()=>{
+ lang=lang==='en'?'ha':'en';
+ applyLanguage();
+});
+$('logoutBtn').addEventListener('click',async()=>{
+ const btn=$('logoutBtn');
+ btn.disabled=true;
+ try{
+   const result=await db.auth.signOut();
+   if(result.error)throw result.error;
+   user=null;business=null;settings=null;
+   data={products:[],categories:[],sales:[],purchases:[],customers:[],suppliers:[],expenses:[],saleItems:[],purchaseItems:[]};
+   showAuth();
+   $('authDesc').textContent=lang==='ha'?'Ka fita daga asusunka.':'You have been signed out.';
+   toast(lang==='ha'?'An fita lafiya.':'Signed out successfully.');
+ }catch(error){
+   toast((lang==='ha'?'An kasa fita: ':'Log out failed: ')+(error?.message||error));
+ }finally{btn.disabled=false}
+});
+
 })();
 </script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.error('Service worker registration failed:',err)));}</script></body></html>
