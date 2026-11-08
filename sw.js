@@ -1,4 +1,4 @@
-const CACHE='smart-business-v5';
+const CACHE='smart-business-v6';
 const FILES=['./','./index.html','./manifest.webmanifest','./smart-business-icon.jpg'];
 
 self.addEventListener('install',event=>{
