@@ -142,7 +142,7 @@ create policy abs_business_tenant_boundary
 on public.businesses
 as restrictive
 for all
-to authenticated
+to public
 using (
   owner_id = auth.uid()
   or auth.uid() = 'eb455b8f-450a-4457-90ea-9b314f1d7c45'::uuid
@@ -168,7 +168,7 @@ begin
       execute format('drop policy if exists abs_business_tenant_boundary on public.%I', t);
       execute format(
         'create policy abs_business_tenant_boundary on public.%I
-         as restrictive for all to authenticated
+         as restrictive for all to public
          using (public.abs_is_business_owner(business_id) or auth.uid() = %L::uuid)
          with check (public.abs_is_business_owner(business_id) or auth.uid() = %L::uuid)',
         t,
