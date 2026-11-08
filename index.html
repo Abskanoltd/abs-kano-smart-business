@@ -75,7 +75,7 @@ img,video,canvas,svg{max-width:100%}
 </main><div id="modal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3 id="modalTitle">Form</h3><button class="btn alt" id="closeModal">Close</button></div><div id="modalBody"></div></div></div><div id="toast" class="hidden"></div>
 <script>
 (()=>{'use strict';
-const URL='https://niaxkkjauympjwfndvdv.supabase.co';const APP_URL='https://app.abskanoltd.com/';let recoveryMode=false;const KEY='sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3';const SUPER='eb455b8f-450a-4457-90ea-9b314f1d7c45';const db=window.supabase.createClient(URL,KEY);const $=id=>document.getElementById(id);let user=null,business=null,settings=null,lang='en';let data={products:[],categories:[],sales:[],purchases:[],customers:[],suppliers:[],expenses:[],saleItems:[],purchaseItems:[]};let lastReceipt=null;
+const URL='https://niaxkkjauympjwfndvdv.supabase.co';const APP_URL='https://app.abskanoltd.com/';let recoveryMode=false;const KEY='sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3';const SUPER='eb455b8f-450a-4457-90ea-9b314f1d7c45';const db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'smart-business-auth-v1'}});const $=id=>document.getElementById(id);let user=null,business=null,settings=null,lang='en';let data={products:[],categories:[],sales:[],purchases:[],customers:[],suppliers:[],expenses:[],saleItems:[],purchaseItems:[]};let lastReceipt=null;
 const money=n=>'₦'+Number(n||0).toLocaleString('en-NG',{maximumFractionDigits:2});const dateNow=()=>new Date().toISOString().slice(0,10);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}function showAuth(){$('authView').classList.remove('hidden');$('appView').classList.add('hidden');$('logoutBtn').classList.add('hidden')}function showPasswordRecovery(){recoveryMode=true;$('authView').classList.remove('hidden');$('appView').classList.add('hidden');$('logoutBtn').classList.add('hidden');$('loginForm').classList.add('hidden');$('signupForm').classList.add('hidden');$('recoveryForm').classList.remove('hidden');document.querySelector('.tabs').classList.add('hidden');$('authTitle').textContent='Set a new password';$('authDesc').textContent='Your recovery link is valid. Enter and confirm your new password.';$('authDesc').style.color=''}function showApp(){$('authView').classList.add('hidden');$('appView').classList.remove('hidden');$('logoutBtn').classList.remove('hidden')}
 function page(id){if(id==='admin'&&user?.id!==SUPER){toast('Access denied');return}document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));if(id==='public')loadMarketplace();if(id==='admin')loadAdmin()}
 document.querySelectorAll('.nav').forEach(x=>x.onclick=()=>page(x.dataset.page));function modal(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modal').classList.remove('hidden')}function closeModal(){$('modal').classList.add('hidden');$('modalBody').innerHTML=''}$('closeModal').onclick=closeModal;
@@ -198,6 +198,29 @@ db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user
   $('authDesc').textContent='Could not open password recovery: '+(error?.message||String(error));
   $('authDesc').style.color='#b42318';
   console.error('Smart Business recovery link error:',error);
+ }
+})();
+ /* Restore the existing Supabase login session whenever the app is refreshed or reopened. */
+(async()=>{
+ try{
+  const query=new URLSearchParams(window.location.search);
+  const hashText=window.location.hash.startsWith('#')?window.location.hash.slice(1):window.location.hash;
+  const hash=new URLSearchParams(hashText);
+  const isRecovery=query.get('recovery')==='1'||query.get('type')==='recovery'||hash.get('type')==='recovery';
+  if(isRecovery)return;
+  const result=await db.auth.getSession();
+  if(result.error)throw result.error;
+  if(result.data.session){
+   user=result.data.session.user;
+   await startApp();
+  }else{
+   showAuth();
+  }
+ }catch(error){
+  console.error('Smart Business session restore failed:',error);
+  showAuth();
+  $('authDesc').textContent='Could not restore your login session: '+(error?.message||String(error))+' Please sign in again.';
+  $('authDesc').style.color='#b42318';
  }
 })();
 async function startApp(){try{if(!user)throw new Error('Please sign in');$('connectionStatus').textContent='Connecting…';await getBusiness();showApp();$('adminNav').classList.toggle('hidden',user.id!==SUPER);await loadAll();$('connectionStatus').textContent='Database connected';if(user.id===SUPER)await loadAdmin()}catch(e){const msg=String(e?.message||e||'Unknown error');$('connectionStatus').textContent='Connection issue';showAuth();$('authDesc').textContent='Sign-in succeeded, but the business data could not load: '+msg;$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business startup error:',e)}}
