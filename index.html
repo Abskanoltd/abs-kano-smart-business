@@ -79,6 +79,65 @@ $('saveSettings').onclick=async()=>{try{let logo=settings?.logo_url||null;const 
 $('savePublic').onclick=async()=>{const r=await db.from('businesses').update({is_public:$('publicBusiness').checked}).eq('id',business.id).eq('owner_id',user.id);if(r.error)toast(r.error.message);else{business.is_public=$('publicBusiness').checked;toast('Visibility saved');loadMarketplace()}};
 async function loadMarketplace(){const g=$('marketGrid');g.innerHTML='<p class="muted">Loading…</p>';const r=await db.rpc('get_public_marketplace');if(r.error){g.textContent='Marketplace unavailable: '+r.error.message;return}const items=r.data||[];g.innerHTML=items.length?items.map(p=>`<article class="marketitem">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'<div style="height:145px;background:#edf1f5"></div>'}<div><b>${esc(p.product_name)}</b><p class="muted">${esc(p.business_name)}${p.category_name?' · '+esc(p.category_name):''}</p><strong>${money(p.selling_price)}</strong><p class="muted">${esc(p.business_phone||'')}</p></div></article>`).join(''):'<p class="empty">No products have been published yet.</p>'}
 async function loadAdmin(){if(user.id!==SUPER)return;const r=await db.from('businesses').select('id,owner_id,business_name,is_public,created_at').order('created_at',{ascending:false});if(r.error){toast('Admin view: '+r.error.message);return}const arr=r.data||[];$('adminBusinesses').textContent=arr.length;$('adminPublic').textContent=arr.filter(x=>x.is_public).length;table('adminRows',arr.map(x=>`<tr><td>${esc(x.business_name)}</td><td>${esc(x.owner_id)}</td><td>${x.is_public?'Yes':'No'}</td><td>${esc((x.created_at||'').slice(0,10))}</td></tr>`).join(''))}
+
+$('showLogin').onclick=()=>{
+ $('loginForm').classList.remove('hidden');
+ $('signupForm').classList.add('hidden');
+ $('showLogin').classList.remove('alt');
+ $('showSignup').classList.add('alt');
+ $('authTitle').textContent=lang==='ha'?'Shiga':'Welcome';
+ $('authDesc').textContent=lang==='ha'?'Shiga cikin asusunka na kasuwanci.':'Sign in to your business account.';
+};
+$('showSignup').onclick=()=>{
+ $('signupForm').classList.remove('hidden');
+ $('loginForm').classList.add('hidden');
+ $('showSignup').classList.remove('alt');
+ $('showLogin').classList.add('alt');
+ $('authTitle').textContent=lang==='ha'?'Buɗe sabon asusu':'Create your business account';
+ $('authDesc').textContent=lang==='ha'?'Cika bayanan domin buɗe asusun kasuwancinka.':'Enter your details to create a separate business account.';
+};
+$('signupForm').onsubmit=async e=>{
+ e.preventDefault();
+ const form=e.currentTarget;
+ const submit=form.querySelector('button[type="submit"],button:not([type])');
+ const name=$('signupName').value.trim();
+ const businessName=$('signupBusiness').value.trim();
+ const email=$('signupEmail').value.trim();
+ const password=$('signupPassword').value;
+ if(!name||!businessName||!email||password.length<8){
+  $('authDesc').textContent=lang==='ha'?'Cika dukkan bayanai; kalmar sirri ta kasance aƙalla haruffa 8.':'Complete all fields; password must be at least 8 characters.';
+  $('authDesc').style.color='#b42318';return;
+ }
+ if(submit){submit.disabled=true;submit.textContent=lang==='ha'?'Ana ƙirƙirar asusu…':'Creating account…'}
+ $('authDesc').textContent=lang==='ha'?'Ana ƙirƙirar asusunka…':'Creating your account…';
+ $('authDesc').style.color='';
+ try{
+  const result=await db.auth.signUp({
+   email,password,
+   options:{data:{full_name:name,business_name:businessName}}
+  });
+  if(result.error)throw result.error;
+  if(result.data.session&&result.data.user){
+   user=result.data.user;
+   await startApp();
+   toast(lang==='ha'?'An ƙirƙiri asusunka cikin nasara.':'Your account was created successfully.');
+  }else{
+   $('authDesc').textContent=lang==='ha'?'An karɓi rajistarka. Duba imel domin tabbatar da adireshinka, sannan ka shiga.':'Registration received. Check your email to confirm your address, then sign in.';
+   $('authDesc').style.color='#14845b';
+   form.reset();
+   $('loginEmail').value=email;
+   $('signupForm').classList.add('hidden');
+   $('loginForm').classList.remove('hidden');
+  }
+ }catch(error){
+  $('authDesc').textContent=(lang==='ha'?'An kasa ƙirƙirar asusu: ':'Account creation failed: ')+(error?.message||String(error));
+  $('authDesc').style.color='#b42318';
+  $('authDesc').style.fontWeight='600';
+  console.error('Smart Business signup error:',error);
+ }finally{
+  if(submit){submit.disabled=false;submit.textContent='Create account'}
+ }
+};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const submit=e.target.querySelector('button[type="submit"],button:not([type])');if(submit){submit.disabled=true;submit.textContent='Signing in…'}$('authDesc').textContent='Signing in…';$('authDesc').style.color='';try{const r=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(r.error)throw r.error;user=r.data.user;await startApp()}catch(err){$('authDesc').textContent='Sign-in error: '+String(err?.message||err);$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business sign-in error:',err)}finally{if(submit){submit.disabled=false;submit.textContent='Sign in'}}};
 async function startApp(){try{if(!user)throw new Error('Please sign in');$('connectionStatus').textContent='Connecting…';await getBusiness();showApp();$('adminNav').classList.toggle('hidden',user.id!==SUPER);await loadAll();$('connectionStatus').textContent='Database connected';if(user.id===SUPER)await loadAdmin()}catch(e){const msg=String(e?.message||e||'Unknown error');$('connectionStatus').textContent='Connection issue';showAuth();$('authDesc').textContent='Sign-in succeeded, but the business data could not load: '+msg;$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business startup error:',e)}}
 /* Logout and Hausa/English interface controls */
