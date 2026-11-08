@@ -142,6 +142,33 @@ $('loginForm').onsubmit=async e=>{e.preventDefault();const submit=e.target.query
 $('forgotPasswordBtn').onclick=async()=>{const email=$('loginEmail').value.trim();const btn=$('forgotPasswordBtn');if(!email){$('authDesc').textContent='Enter your email address first, then tap Forgot password.';$('authDesc').style.color='#b42318';$('loginEmail').focus();return}btn.disabled=true;btn.textContent='Sending…';$('authDesc').textContent='Sending password recovery email…';$('authDesc').style.color='';try{const result=await db.auth.resetPasswordForEmail(email,{redirectTo:APP_URL+'?recovery=1'});if(result.error)throw result.error;$('authDesc').textContent='Password reset email sent. Open the latest email and tap the Reset password link.';$('authDesc').style.color='#14845b'}catch(error){$('authDesc').textContent='Could not send reset email: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password reset request failed:',error)}finally{btn.disabled=false;btn.textContent='Forgot password?'}};
 $('recoveryForm').onsubmit=async e=>{e.preventDefault();const password=$('newPassword').value;const confirmPassword=$('confirmNewPassword').value;const btn=e.currentTarget.querySelector('button[type="submit"]');if(password.length<8){$('authDesc').textContent='Password must contain at least 8 characters.';$('authDesc').style.color='#b42318';return}if(password!==confirmPassword){$('authDesc').textContent='The passwords do not match.';$('authDesc').style.color='#b42318';return}btn.disabled=true;btn.textContent='Updating…';try{const updated=await db.auth.updateUser({password});if(updated.error)throw updated.error;const email=updated.data.user?.email||'';const signedOut=await db.auth.signOut();if(signedOut.error)throw signedOut.error;user=null;recoveryMode=false;e.currentTarget.reset();$('recoveryForm').classList.add('hidden');document.querySelector('.tabs').classList.remove('hidden');$('showLogin').click();$('loginEmail').value=email;$('authDesc').textContent='Password updated successfully. Sign in with your new password.';$('authDesc').style.color='#14845b';toast('Password updated. Please sign in.')}catch(error){$('authDesc').textContent='Password update failed: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password update failed:',error)}finally{btn.disabled=false;btn.textContent='Update password'}};
 db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user=session?.user||null;showPasswordRecovery()}});
+/* Restore the recovery screen even when Supabase finishes parsing the email link before this listener is attached. */
+(async()=>{
+ try{
+  const query=new URLSearchParams(window.location.search);
+  const hashText=window.location.hash.startsWith('#')?window.location.hash.slice(1):window.location.hash;
+  const hash=new URLSearchParams(hashText);
+  const isRecovery=query.get('recovery')==='1'||query.get('type')==='recovery'||hash.get('type')==='recovery';
+  if(!isRecovery)return;
+  const result=await db.auth.getSession();
+  if(result.error)throw result.error;
+  if(result.data.session){
+   user=result.data.session.user;
+   showPasswordRecovery();
+  }else{
+   showAuth();
+   $('authDesc').textContent='This password reset link is expired or incomplete. Request a new password reset email and open the newest link.';
+   $('authDesc').style.color='#b42318';
+   $('loginForm').classList.remove('hidden');
+   $('recoveryForm').classList.add('hidden');
+  }
+ }catch(error){
+  showAuth();
+  $('authDesc').textContent='Could not open password recovery: '+(error?.message||String(error));
+  $('authDesc').style.color='#b42318';
+  console.error('Smart Business recovery link error:',error);
+ }
+})();
 async function startApp(){try{if(!user)throw new Error('Please sign in');$('connectionStatus').textContent='Connecting…';await getBusiness();showApp();$('adminNav').classList.toggle('hidden',user.id!==SUPER);await loadAll();$('connectionStatus').textContent='Database connected';if(user.id===SUPER)await loadAdmin()}catch(e){const msg=String(e?.message||e||'Unknown error');$('connectionStatus').textContent='Connection issue';showAuth();$('authDesc').textContent='Sign-in succeeded, but the business data could not load: '+msg;$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business startup error:',e)}}
 /* Logout and Hausa/English interface controls */
 const languagePairs={
