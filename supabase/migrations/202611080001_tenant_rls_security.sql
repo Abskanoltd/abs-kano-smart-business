@@ -133,6 +133,93 @@ using (
   end
 );
 
+
+-- Restrictive policies are intentional: PostgreSQL combines permissive policies
+-- with OR. These restrictive checks ensure an older broad policy cannot bypass
+-- the tenant boundary established above.
+drop policy if exists abs_business_tenant_boundary on public.businesses;
+create policy abs_business_tenant_boundary
+on public.businesses
+as restrictive
+for all
+to authenticated
+using (
+  owner_id = auth.uid()
+  or auth.uid() = 'eb455b8f-450a-4457-90ea-9b314f1d7c45'::uuid
+)
+with check (
+  owner_id = auth.uid()
+  or auth.uid() = 'eb455b8f-450a-4457-90ea-9b314f1d7c45'::uuid
+);
+
+do $
+declare
+  t text;
+  app_tables text[] := array[
+    'business_settings','products','categories','sales','purchases',
+    'customers','suppliers','expenses','sale_items','purchase_items'
+  ];
+begin
+  foreach t in array app_tables loop
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = t and column_name = 'business_id'
+    ) then
+      execute format('drop policy if exists abs_business_tenant_boundary on public.%I', t);
+      execute format(
+        'create policy abs_business_tenant_boundary on public.%I
+         as restrictive for all to authenticated
+         using (public.abs_is_business_owner(business_id) or auth.uid() = %L::uuid)
+         with check (public.abs_is_business_owner(business_id) or auth.uid() = %L::uuid)',
+        t,
+        'eb455b8f-450a-4457-90ea-9b314f1d7c45',
+        'eb455b8f-450a-4457-90ea-9b314f1d7c45'
+      );
+    end if;
+  end loop;
+end $;
+
+-- Keep unrelated storage buckets unchanged while enforcing the product-images
+-- tenant boundary even if another permissive storage policy already exists.
+drop policy if exists abs_product_images_tenant_boundary on storage.objects;
+create policy abs_product_images_tenant_boundary
+on storage.objects
+as restrictive
+for all
+to authenticated
+using (
+  bucket_id <> 'product-images'
+  or (
+    case
+      when (storage.foldername(name))[1] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+-- IMPORTANT:
+-- 1) This migration secures existing business_id tables and product-image writes.
+-- 2) It does not create or alter the record_product_sale, record_purchase, or
+--    get_public_marketplace RPCs. Those must be checked against the live schema.
+-- 3) Apply this file in Supabase SQL Editor, then test each app workflow.
+
+      then public.abs_is_business_owner(((storage.foldername(name))[1])::uuid)
+      else false
+    end
+  )
+)
+with check (
+  bucket_id <> 'product-images'
+  or (
+    case
+      when (storage.foldername(name))[1] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+-- IMPORTANT:
+-- 1) This migration secures existing business_id tables and product-image writes.
+-- 2) It does not create or alter the record_product_sale, record_purchase, or
+--    get_public_marketplace RPCs. Those must be checked against the live schema.
+-- 3) Apply this file in Supabase SQL Editor, then test each app workflow.
+
+      then public.abs_is_business_owner(((storage.foldername(name))[1])::uuid)
+      else false
+    end
+  )
+);
+
 commit;
 
 -- IMPORTANT:
