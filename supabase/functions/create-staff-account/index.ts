@@ -145,7 +145,7 @@ Deno.serve(async (req: Request) => {
       active: true,
     });
     if (linkError) {
-      if (createdNewUser) await admin.auth.admin.deleteUser(staffUserId);
+      await admin.auth.admin.deleteUser(staffUserId);
       throw linkError;
     }
 
