@@ -18,8 +18,39 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const url = Deno.env.get("SUPABASE_URL") ?? "";
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_SECRET_KEY") ?? "";
+  // Supabase now injects named key dictionaries. Prefer the new keys,
+  // while retaining legacy fallbacks for projects still using anon/service_role.
+  const publishableKeysRaw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
+  const secretKeysRaw = Deno.env.get("SUPABASE_SECRET_KEYS");
+
+  let publishableKey = "";
+  let secretKey = "";
+
+  try {
+    if (publishableKeysRaw) {
+      const keys = JSON.parse(publishableKeysRaw);
+      publishableKey = keys.default ?? "";
+    }
+    if (secretKeysRaw) {
+      const keys = JSON.parse(secretKeysRaw);
+      secretKey = keys.default ?? "";
+    }
+  } catch {
+    console.error("Supabase named API key environment variables are not valid JSON.");
+    return json({ error: "Staff service API keys are misconfigured." }, 500);
+  }
+
+  const anonKey =
+    publishableKey ||
+    Deno.env.get("SUPABASE_ANON_KEY") ||
+    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+    "";
+
+  const serviceKey =
+    secretKey ||
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+    Deno.env.get("SUPABASE_SECRET_KEY") ||
+    "";
   if (!url || !anonKey || !serviceKey) {
     console.error("Missing Supabase URL, publishable/anon key, or service secret");
     return json({ error: "Staff service is not configured on the server." }, 500);
