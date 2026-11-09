@@ -61,40 +61,50 @@ Deno.serve(async (req: Request) => {
 
     // Reuse a previously-created, unconfirmed staff signup only when it is not
     // an owner account and is not already assigned to another shop.
+    // Never take over or reset an existing Auth account. A shop owner
+    // must not be able to claim an email address that already belongs to
+    // another person. Existing unconfirmed accounts must be reviewed and
+    // removed by an authorized project admin before the email can be reused.
     let existingUser: any = null;
+
     for (let page = 1; page <= 20 && !existingUser; page++) {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 500 });
+      const { data, error } = await admin.auth.admin.listUsers({
+        page,
+        perPage: 500,
+      });
+
       if (error) throw error;
-      existingUser = data.users.find((u) => (u.email ?? "").toLowerCase() === email) ?? null;
+
+      existingUser = data.users.find(
+        (u) => (u.email ?? "").toLowerCase() === email
+      ) ?? null;
+
       if (data.users.length < 500) break;
     }
 
-    let staffUserId: string;
-    let createdNewUser = false;
     if (existingUser) {
-      if (existingUser.id === ownerId) return json({ error: "You cannot add the owner's own email as staff." }, 409);
-      const { data: ownedBusiness, error: ownerCheckError } = await admin
-        .from("businesses").select("id").eq("owner_id", existingUser.id).maybeSingle();
-      if (ownerCheckError) throw ownerCheckError;
-      if (ownedBusiness || existingUser.user_metadata?.business_name || existingUser.user_metadata?.role === "owner") return json({ error: "This email already belongs to a business owner account. Use a different staff email." }, 409);
+      return json({
+        error: "This email already has a Smart Business login. Use a different email, or ask the system administrator to review the existing account before reusing it."
+      }, 409);
+    }
 
-      const { data: assignedStaff, error: assignedError } = await admin
-        .from("business_staff").select("id").eq("user_id", existingUser.id).maybeSingle();
-      if (assignedError) throw assignedError;
-      if (assignedStaff) return json({ error: "This account is already assigned as staff. Use its existing shop login." }, 409);
-      staffUserId = existingUser.id;
-    } else {
-      const { data: created, error: createError } = await admin.auth.admin.createUser({
+    const { data: created, error: createError } =
+      await admin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
-        user_metadata: { full_name: fullName, role: "staff" },
+        user_metadata: {
+          full_name: fullName,
+          role: "staff"
+        },
       });
-      if (createError) throw createError;
-      if (!created.user) throw new Error("Supabase did not return the new staff account.");
-      staffUserId = created.user.id;
-      createdNewUser = true;
+
+    if (createError) throw createError;
+    if (!created.user) {
+      throw new Error("Supabase did not return the new staff account.");
     }
+
+    const staffUserId = created.user.id;
 
     const { error: linkError } = await admin.from("business_staff").insert({
       business_id: business.id,
@@ -108,17 +118,6 @@ Deno.serve(async (req: Request) => {
       throw linkError;
     }
 
-    if (!createdNewUser) {
-      const { error: updateError } = await admin.auth.admin.updateUserById(staffUserId, {
-        password,
-        email_confirm: true,
-        user_metadata: { ...(existingUser.user_metadata ?? {}), full_name: fullName, role: "staff" },
-      });
-      if (updateError) {
-        await admin.from("business_staff").delete().eq("user_id", staffUserId).eq("business_id", business.id);
-        throw updateError;
-      }
-    }
 
     return json({
       ok: true,
