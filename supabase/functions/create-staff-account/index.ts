@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
     const email = String(body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");
     if (fullName.length < 2) return json({ error: "Enter the staff member's full name." }, 400);
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({ error: "Enter a valid staff email address." }, 400);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Enter a valid staff email address." }, 400);
     if (password.length < 8) return json({ error: "The initial password must contain at least 8 characters." }, 400);
 
     const { data: business, error: businessError } = await admin
@@ -76,7 +76,7 @@ Deno.serve(async (req: Request) => {
       const { data: ownedBusiness, error: ownerCheckError } = await admin
         .from("businesses").select("id").eq("owner_id", existingUser.id).maybeSingle();
       if (ownerCheckError) throw ownerCheckError;
-      if (ownedBusiness) return json({ error: "This email already belongs to a business owner account. Use a different staff email." }, 409);
+      if (ownedBusiness || existingUser.user_metadata?.business_name || existingUser.user_metadata?.role === "owner") return json({ error: "This email already belongs to a business owner account. Use a different staff email." }, 409);
 
       const { data: assignedStaff, error: assignedError } = await admin
         .from("business_staff").select("id").eq("user_id", existingUser.id).maybeSingle();
