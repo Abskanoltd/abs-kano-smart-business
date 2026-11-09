@@ -124,3 +124,6 @@ $$;
 revoke all on function public.record_multi_product_sale(jsonb,uuid,text,text,text,text,numeric,numeric,timestamptz) from public;
 grant execute on function public.record_multi_product_sale(jsonb,uuid,text,text,text,text,numeric,numeric,timestamptz) to authenticated;
 commit;
+
+-- Refresh the API schema cache so the new RPC is immediately discoverable.
+notify pgrst, 'reload schema';
