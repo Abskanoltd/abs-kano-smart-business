@@ -90,52 +90,69 @@ Deno.serve(async (req: Request) => {
     if (staffCheckError) throw staffCheckError;
     if (alreadyStaff) return json({ error: "This email is already registered as staff for this shop." }, 409);
 
-    // Reuse a previously-created, unconfirmed staff signup only when it is not
-    // an owner account and is not already assigned to another shop.
-    // Never take over or reset an existing Auth account. A shop owner
-    // must not be able to claim an email address that already belongs to
-    // another person. Existing unconfirmed accounts must be reviewed and
-    // removed by an authorized project admin before the email can be reused.
+    // Find an existing Auth user, if any. Reuse is restricted to the
+    // specific safe recovery case: an unconfirmed account whose stored name
+    // matches the owner-entered staff name and which is not an owner or linked
+    // to any business. Confirm and set the initial password server-side.
     let existingUser: any = null;
 
     for (let page = 1; page <= 20 && !existingUser; page++) {
-      const { data, error } = await admin.auth.admin.listUsers({
-        page,
-        perPage: 500,
-      });
-
+      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 500 });
       if (error) throw error;
-
-      existingUser = data.users.find(
-        (u) => (u.email ?? "").toLowerCase() === email
-      ) ?? null;
-
+      existingUser = data.users.find((u) => (u.email ?? "").toLowerCase() === email) ?? null;
       if (data.users.length < 500) break;
     }
 
-    if (existingUser) {
-      return json({
-        error: "This email already has a Smart Business login. Use a different email, or ask the system administrator to review the existing account before reusing it."
-      }, 409);
-    }
+    let staffUserId = "";
 
-    const { data: created, error: createError } =
-      await admin.auth.admin.createUser({
+    if (existingUser) {
+      const storedName = String(existingUser.user_metadata?.full_name ?? "").trim().toLowerCase();
+      const requestedName = fullName.trim().toLowerCase();
+      const isOwner = Boolean(existingUser.app_metadata?.role === "owner" ||
+        existingUser.user_metadata?.role === "owner");
+
+      if (existingUser.email_confirmed_at || storedName !== requestedName || isOwner) {
+        return json({
+          error: "This email already belongs to an existing or confirmed account and cannot be reused as staff."
+        }, 409);
+      }
+
+      const { data: ownerBusiness, error: ownerCheckError } = await admin
+        .from("businesses").select("id").eq("owner_id", existingUser.id).maybeSingle();
+      if (ownerCheckError) throw ownerCheckError;
+      if (ownerBusiness) {
+        return json({ error: "An owner account cannot be added as staff." }, 409);
+      }
+
+      const { data: linkedStaff, error: linkedStaffError } = await admin
+        .from("business_staff").select("id").or(`user_id.eq.${existingUser.id},email.eq.${email}`).limit(1);
+      if (linkedStaffError) throw linkedStaffError;
+      if (linkedStaff && linkedStaff.length > 0) {
+        return json({ error: "This account is already linked to a business and cannot be reassigned." }, 409);
+      }
+
+      const { data: updated, error: updateError } = await admin.auth.admin.updateUserById(
+        existingUser.id,
+        {
+          password,
+          email_confirm: true,
+          user_metadata: { ...existingUser.user_metadata, full_name: fullName, role: "staff" },
+        }
+      );
+      if (updateError) throw updateError;
+      if (!updated.user) throw new Error("Supabase did not return the updated staff account.");
+      staffUserId = updated.user.id;
+    } else {
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
-        user_metadata: {
-          full_name: fullName,
-          role: "staff"
-        },
+        user_metadata: { full_name: fullName, role: "staff" },
       });
-
-    if (createError) throw createError;
-    if (!created.user) {
-      throw new Error("Supabase did not return the new staff account.");
+      if (createError) throw createError;
+      if (!created.user) throw new Error("Supabase did not return the new staff account.");
+      staffUserId = created.user.id;
     }
-
-    const staffUserId = created.user.id;
 
     const { error: linkError } = await admin.from("business_staff").insert({
       business_id: business.id,
