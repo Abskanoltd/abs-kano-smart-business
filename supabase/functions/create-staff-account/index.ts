@@ -104,6 +104,7 @@ Deno.serve(async (req: Request) => {
     }
 
     let staffUserId = "";
+    let createdNewUser = false;
 
     if (existingUser) {
       const storedName = String(existingUser.user_metadata?.full_name ?? "").trim().toLowerCase();
@@ -152,6 +153,7 @@ Deno.serve(async (req: Request) => {
       if (createError) throw createError;
       if (!created.user) throw new Error("Supabase did not return the new staff account.");
       staffUserId = created.user.id;
+      createdNewUser = true;
     }
 
     const { error: linkError } = await admin.from("business_staff").insert({
@@ -162,7 +164,11 @@ Deno.serve(async (req: Request) => {
       active: true,
     });
     if (linkError) {
-      await admin.auth.admin.deleteUser(staffUserId);
+      // Only roll back a newly-created Auth user. Never delete a reused account.
+      if (createdNewUser) {
+        const { error: deleteError } = await admin.auth.admin.deleteUser(staffUserId);
+        if (deleteError) console.error("Could not roll back newly-created Auth user:", deleteError);
+      }
       throw linkError;
     }
 
