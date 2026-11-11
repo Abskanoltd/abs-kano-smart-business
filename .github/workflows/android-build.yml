@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/index.html
-          cp node_modules/@supabase/supabase-js/dist/umd/supabase.js www/supabase.js
+          npx esbuild supabase-entry.js --bundle --format=iife --outfile=www/supabase.js
           sed -i 's#https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2#./supabase.js#' www/index.html
           test -s www/supabase.js
 
