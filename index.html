@@ -183,8 +183,8 @@ img,video,canvas,svg{max-width:100%}
 <header><div class="brand"><img class="logo" src="./smart-business-icon.jpg" alt="Smart Business logo"><div><strong id="brandName">Smart Business</strong><small>ABS KANO LTD</small></div></div><div class="head-actions"><button class="btn alt" id="languageBtn">Hausa</button><button class="btn alt hidden" id="logoutBtn">Log out</button></div></header>
 <main>
 <section id="authView" class="auth"><h1 id="authTitle">Welcome</h1><p class="muted" id="authDesc">Sign in or create your business account.</p><div class="tabs"><button class="btn" id="showLogin">Sign in</button><button class="btn alt" id="showSignup">Create account</button></div>
-<form id="loginForm"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required><button class="btn" style="width:100%;margin-top:15px">Sign in</button><p style="text-align:right;margin:12px 0 0"><button type="button" id="forgotPasswordBtn" class="btn alt">Forgot password?</button></p></form>
-<form id="signupForm" class="hidden"><label>Your name</label><input id="signupName" required><label>Business / shop name</label><input id="signupBusiness" maxlength="120" required><label>Email</label><input id="signupEmail" type="email" autocomplete="email" required><label>Password (at least 8 characters)</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required><button class="btn" style="width:100%;margin-top:15px">Create account</button><p class="muted">A separate business workspace will be created for your account.</p></form><form id="recoveryForm" class="hidden"><p class="muted">Choose a new password for your account.</p><label>New password (at least 8 characters)</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" required><label>Confirm new password</label><input id="confirmNewPassword" type="password" minlength="8" autocomplete="new-password" required><button class="btn" type="submit" style="width:100%;margin-top:15px">Update password</button></form>
+<form id="loginForm"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required><button type="submit" class="btn" style="width:100%;margin-top:15px">Sign in</button><p style="text-align:right;margin:12px 0 0"><button type="button" id="forgotPasswordBtn" class="btn alt">Forgot password?</button></p></form>
+<form id="signupForm" class="hidden"><label>Your name</label><input id="signupName" required><label>Business / shop name</label><input id="signupBusiness" maxlength="120" required><label>Email</label><input id="signupEmail" type="email" autocomplete="email" required><label>Password (at least 8 characters)</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required><button type="submit" class="btn" style="width:100%;margin-top:15px">Create account</button><p class="muted">A separate business workspace will be created for your account.</p></form><form id="recoveryForm" class="hidden"><p class="muted">Choose a new password for your account.</p><label>New password (at least 8 characters)</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" required><label>Confirm new password</label><input id="confirmNewPassword" type="password" minlength="8" autocomplete="new-password" required><button class="btn" type="submit" style="width:100%;margin-top:15px">Update password</button></form>
 </section>
 <section id="appView" class="hidden"><section id="staffPortal" class="hidden"><div class="card"><h2>Staff Workspace</h2><p class="muted" id="staffWelcome"></p><span class="pill">Restricted staff access</span></div><div class="card" style="margin-top:12px"><div class="topline"><h3>Products available for sale</h3><button class="btn alt" id="staffRefresh">Refresh</button></div><div id="staffProductList" class="product-grid"><p class="muted">Loading products…</p></div></div><p class="muted" style="margin-top:12px">This account cannot access owner settings, purchase costs, expenses, reports, or profit.</p></section><div class="topline" id="topline"><div><h1 id="welcomeTitle">Business dashboard</h1><p class="muted" id="businessSubtitle"></p></div><span class="pill" id="connectionStatus">Checking connection…</span></div>
 <div class="layout"><aside class="sidebar" id="sidebar">
@@ -206,6 +206,34 @@ img,video,canvas,svg{max-width:100%}
 </div></div></section>
 <div id="printArea" class="hidden"></div>
 </main><div id="modal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3 id="modalTitle">Form</h3><button class="btn alt" id="closeModal">Close</button></div><div id="modalBody"></div></div></div><div id="toast" class="hidden"></div>
+<script>
+/* Auth startup diagnostics: prevent silent native form reloads if app JS fails before binding. */
+(()=> {
+ const show=(message)=>{
+  const desc=document.getElementById('authDesc');
+  if(desc){desc.textContent=message;desc.style.color='#b42318';desc.style.fontWeight='700';}
+  const auth=document.getElementById('authView');
+  if(auth)auth.classList.remove('hidden');
+ };
+ window.addEventListener('error',event=>{
+  console.error('[ABS startup diagnostic]',event.message,event.filename,event.lineno);
+  show('App startup error: '+(event.message||'JavaScript failed to start')+'. Please send this message to support.');
+ });
+ window.addEventListener('unhandledrejection',event=>{
+  const reason=event.reason;
+  console.error('[ABS startup diagnostic] Unhandled promise:',reason);
+  show('App startup error: '+(reason?.message||String(reason)||'Unexpected background error'));
+ });
+ document.addEventListener('submit',event=>{
+  const form=event.target;
+  if((form?.id==='loginForm'||form?.id==='signupForm')&&form.dataset.authHandlerReady!=='1'){
+   event.preventDefault();
+   show('Login system did not finish loading. Please refresh the app and send this message to support.');
+   console.error('[ABS startup diagnostic] Auth submit handler was not attached for',form.id);
+  }
+ },true);
+})();
+</script>
 <script>
 (()=>{'use strict';
 const URL='https://niaxkkjauympjwfndvdv.supabase.co';const APP_URL='https://app.abskanoltd.com/';let recoveryMode=false;const KEY='sb_publishable_6v7Yy1Mvxv5CauhYKdr5xA_-LLDDZb3';const SUPER='eb455b8f-450a-4457-90ea-9b314f1d7c45';const db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});const $=id=>document.getElementById(id);let user=null,business=null,settings=null,lang='en',staffMode=false,staffAccess=null;let data={products:[],categories:[],sales:[],purchases:[],customers:[],suppliers:[],expenses:[],saleItems:[],purchaseItems:[]};let lastReceipt=null,staffProducts=[];
@@ -264,7 +292,7 @@ $('showSignup').onclick=()=>{
  $('authTitle').textContent=lang==='ha'?'Buɗe sabon asusu':'Create your business account';
  $('authDesc').textContent=lang==='ha'?'Cika bayanan domin buɗe asusun kasuwancinka.':'Enter your details to create a separate business account.';
 };
-$('signupForm').onsubmit=async e=>{
+$('signupForm').dataset.authHandlerReady='1';$('signupForm').onsubmit=async e=>{
  e.preventDefault();
  const form=e.currentTarget;
  const submit=form.querySelector('button[type="submit"],button:not([type])');
@@ -306,7 +334,7 @@ $('signupForm').onsubmit=async e=>{
   if(submit){submit.disabled=false;submit.textContent='Create account'}
  }
 };
-$('loginForm').onsubmit=async e=>{e.preventDefault();const submit=e.target.querySelector('button[type="submit"],button:not([type])');if(submit){submit.disabled=true;submit.textContent='Signing in…'}$('authDesc').textContent='Signing in…';$('authDesc').style.color='';try{const r=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(r.error)throw r.error;user=r.data.user;await startApp()}catch(err){$('authDesc').textContent='Sign-in error: '+String(err?.message||err);$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business sign-in error:',err)}finally{if(submit){submit.disabled=false;submit.textContent='Sign in'}}};
+$('loginForm').dataset.authHandlerReady='1';$('loginForm').onsubmit=async e=>{e.preventDefault();const submit=e.target.querySelector('button[type="submit"],button:not([type])');if(submit){submit.disabled=true;submit.textContent='Signing in…'}$('authDesc').textContent='Signing in…';$('authDesc').style.color='';try{const r=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(r.error)throw r.error;user=r.data.user;await startApp()}catch(err){$('authDesc').textContent='Sign-in error: '+String(err?.message||err);$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business sign-in error:',err)}finally{if(submit){submit.disabled=false;submit.textContent='Sign in'}}};
 $('forgotPasswordBtn').onclick=async()=>{const email=$('loginEmail').value.trim();const btn=$('forgotPasswordBtn');if(!email){$('authDesc').textContent='Enter your email address first, then tap Forgot password.';$('authDesc').style.color='#b42318';$('loginEmail').focus();return}btn.disabled=true;btn.textContent='Sending…';$('authDesc').textContent='Sending password recovery email…';$('authDesc').style.color='';try{const result=await db.auth.resetPasswordForEmail(email,{redirectTo:APP_URL+'?recovery=1'});if(result.error)throw result.error;$('authDesc').textContent='Password reset email sent. Open the latest email and tap the Reset password link.';$('authDesc').style.color='#14845b'}catch(error){$('authDesc').textContent='Could not send reset email: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password reset request failed:',error)}finally{btn.disabled=false;btn.textContent='Forgot password?'}};
 $('recoveryForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;const password=$('newPassword').value;const confirmPassword=$('confirmNewPassword').value;const btn=e.currentTarget.querySelector('button[type="submit"]');if(password.length<8){$('authDesc').textContent='Password must contain at least 8 characters.';$('authDesc').style.color='#b42318';return}if(password!==confirmPassword){$('authDesc').textContent='The passwords do not match.';$('authDesc').style.color='#b42318';return}btn.disabled=true;btn.textContent='Updating…';try{const updated=await db.auth.updateUser({password});if(updated.error)throw updated.error;const email=updated.data.user?.email||'';const signedOut=await db.auth.signOut();if(signedOut.error)throw signedOut.error;user=null;recoveryMode=false;form.reset();$('recoveryForm').classList.add('hidden');document.querySelector('.tabs').classList.remove('hidden');$('showLogin').click();$('loginEmail').value=email;$('authDesc').textContent='Password updated successfully. Sign in with your new password.';$('authDesc').style.color='#14845b';toast('Password updated. Please sign in.')}catch(error){$('authDesc').textContent='Password update failed: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password update failed:',error)}finally{btn.disabled=false;btn.textContent='Update password'}};
 db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user=session?.user||null;showPasswordRecovery()}});
