@@ -354,6 +354,7 @@ db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user
    showAuth();
   }
  }catch(error){
+  if(loginInProgress)return;
   console.error('Smart Business session restore failed:',error);
   showAuth();
   $('authDesc').textContent='Could not restore your login session: '+(error?.message||String(error))+' Please sign in again.';
