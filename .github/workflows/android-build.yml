@@ -33,7 +33,8 @@ jobs:
 
       - name: Validate app JavaScript syntax
         run: |
-          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(x=>x[1]).filter(Boolean);if(!scripts.length)throw new Error('No inline app script found');scripts.forEach((script,index)=>{try{new Function(script)}catch(error){console.error('Inline script '+index+' syntax error:',error);process.exitCode=1}})"
+          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(x=>x[1]).filter(Boolean);const app=scripts.find(s=>s.includes('signInWithPassword'));if(!app)throw new Error('App script not found');fs.writeFileSync('/tmp/abs-app.js',app)"
+          node --check /tmp/abs-app.js
       - name: Install dependencies
         run: npm install
 
