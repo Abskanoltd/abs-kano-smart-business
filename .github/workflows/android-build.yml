@@ -42,6 +42,7 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/index.html
+          cp smart-business-icon.jpg www/smart-business-icon.jpg
           npx esbuild supabase-entry.js --bundle --format=iife --outfile=www/supabase.js
           npx esbuild native-share-entry.js --bundle --format=iife --outfile=www/native-share.js
           sed -i 's#https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2#./supabase.js#' www/index.html
