@@ -31,6 +31,10 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      - name: Validate app JavaScript syntax
+        run: |
+          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(x=>x[1]).filter(Boolean);const app=scripts.find(s=>s.includes('signInWithPassword'));if(!app)throw new Error('App script not found');fs.writeFileSync('/tmp/abs-app.js',app)"
+          node --check /tmp/abs-app.js
       - name: Install dependencies
         run: npm install
 
@@ -39,8 +43,10 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           npx esbuild supabase-entry.js --bundle --format=iife --outfile=www/supabase.js
+          npx esbuild native-share-entry.js --bundle --format=iife --outfile=www/native-share.js
           sed -i 's#https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2#./supabase.js#' www/index.html
           test -s www/supabase.js
+          test -s www/native-share.js
 
       - name: Add Android platform
         run: npx cap add android
