@@ -11,6 +11,7 @@
 <title>Smart Business</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="./native-share.js"></script>
 <style>
 :root{--navy:#4b16c8;--blue:#6727e8;--bg:#f7f7fb;--ink:#171827;--muted:#747b8d;--line:#e4e6ef;--green:#16a779;--red:#df4c55;--purple:#6727e8;--soft-purple:#f0eaff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}header{background:var(--navy);color:#fff;padding:12px max(14px,calc((100% - 1240px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:11px;background:#fff;object-fit:cover;display:block;flex:0 0 42px}.brand strong{display:block}.brand small{color:#cad7e6}.head-actions{display:flex;gap:8px}.btn{border:0;border-radius:9px;padding:10px 14px;background:var(--blue);color:white;font-weight:650}.btn.alt{background:#eaf0f7;color:var(--navy)}.btn.red{background:#fff0f0;color:var(--red)}.btn.green{background:var(--green)}.btn:disabled{opacity:.5}main{max-width:1240px;margin:20px auto;padding:0 14px}h1,h2,h3,p{margin-top:0}.muted{color:var(--muted);font-size:13px}label{display:block;font-size:13px;font-weight:650;margin:11px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink)}textarea{min-height:70px}.auth{max-width:480px;margin:7vh auto;background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px}.tabs{display:flex;gap:7px;margin:12px 0}.tabs button{flex:1}.layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px}.sidebar,.card{background:white;border:1px solid var(--line);border-radius:14px}.sidebar{padding:8px;height:max-content;position:sticky;top:78px}.nav{width:100%;text-align:left;border:0;background:transparent;padding:10px;border-radius:8px;color:#43536a;font-weight:600}.nav.active,.nav:hover{background:#edf3fa;color:var(--navy)}.section{display:none}.section.active{display:block}.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.card{padding:15px}.metric small{color:var(--muted)}.metric strong{display:block;font-size:24px;margin-top:7px}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:14px}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}.table th{color:var(--muted)}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.notice{padding:11px;background:#fff8e8;border:1px solid #f1dfb8;color:#74551a;border-radius:9px;font-size:13px;margin-bottom:12px}.empty{text-align:center;padding:20px;color:var(--muted)}.thumb{width:42px;height:42px;object-fit:cover;border-radius:7px}.modal{position:fixed;inset:0;background:#08182dcc;display:grid;place-items:center;padding:12px;z-index:20}.modalbox{background:#fff;border-radius:15px;padding:18px;width:min(680px,100%);max-height:92vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#142b49;color:white;padding:11px 15px;border-radius:9px;z-index:40;max-width:90%}.pill{font-size:11px;padding:4px 8px;border-radius:20px;background:#e8f6ef;color:var(--green)}.marketgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.marketitem{border:1px solid var(--line);border-radius:12px;overflow:hidden}.marketitem img{width:100%;height:145px;object-fit:cover;background:#edf1f5}.marketitem div{padding:11px}.receipt{max-width:520px;margin:auto;color:#111}.receipt h2,.receipt p{text-align:center}.receipt table{width:100%;border-collapse:collapse}.receipt td,.receipt th{padding:7px;border-bottom:1px solid #ddd;text-align:left}.right{text-align:right!important}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
 
@@ -305,46 +306,45 @@ async function showReceipt(type,id){
    const btn=$('shareReceipt');
    btn.disabled=true;
    btn.textContent='Preparing image…';
+   const target=document.querySelector('#modal .receipt');
+   const previousZoom=target?.style.zoom||'';
    try{
-    if(!window.html2canvas)throw new Error('Image tool is still loading. Refresh and try again.');
-    const target=document.querySelector('#modal .receipt');
-    if(!target)throw new Error('Receipt preview not found');
-    const previousZoom=target.style.zoom;
+    if(!window.html2canvas)throw new Error('Receipt image tool is not loaded. Close and reopen the receipt.');
+    if(!target)throw new Error('Receipt preview not found.');
     target.style.zoom='1';
     const canvas=await window.html2canvas(target,{backgroundColor:'#ffffff',scale:3,useCORS:true,logging:false,windowWidth:Math.max(target.scrollWidth,420)});
-    target.style.zoom=previousZoom;
-    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Could not create receipt image')),'image/png'));
-    const filename='Smart-Business-Receipt-'+String(r.head.receipt_number||'receipt').replace(/[^a-z0-9_-]/gi,'-')+'.png';
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Could not create receipt image.')),'image/png'));
+    const filename='ABS-KANO-Receipt-'+String(r.head.receipt_number||'receipt').replace(/[^a-z0-9_-]/gi,'-')+'.png';
     const file=new File([blob],filename,{type:'image/png'});
-    let shared=false;
-    if(typeof navigator.share==='function'){
-     try{
-      await navigator.share({files:[file],title:'Sale receipt',text:'Smart Business receipt'});
-      shared=true;
-      toast('Receipt ready to share. Choose WhatsApp.');
-     }catch(shareErr){
-      if(shareErr.name==='AbortError')throw shareErr;
-      console.warn('Native image sharing failed:',shareErr);
-     }
-    }
-    if(!shared){
-     const a=document.createElement('a');
-     a.download=filename;
+    const isNative=!!(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform());
+    if(isNative){
+     if(typeof window.AbsNativeShareReceipt!=='function')throw new Error('Native sharing service is not installed in this APK. Please install the latest build.');
+     btn.textContent='Opening share menu…';
+     await window.AbsNativeShareReceipt(blob,filename);
+     toast('Receipt share menu opened. Choose WhatsApp or another app.');
+    }else if(typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){
+     await navigator.share({files:[file],title:'ABS KANO LTD receipt',text:'ABS KANO LTD sales receipt'});
+     toast('Receipt share menu opened.');
+    }else{
      const reader=new FileReader();
      const dataUrl=await new Promise((resolve,reject)=>{
       reader.onload=()=>resolve(reader.result);
-      reader.onerror=()=>reject(new Error('Could not prepare receipt image'));
+      reader.onerror=()=>reject(new Error('Could not prepare receipt image for download.'));
       reader.readAsDataURL(blob);
      });
-     a.href=dataUrl;
-     document.body.appendChild(a);
-     a.click();
-     a.remove();
-     toast('This browser cannot share image files directly. Receipt image saved to Downloads.');
+     const a=document.createElement('a');
+     a.download=filename;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove();
+     toast('This browser does not support image sharing. Receipt image was saved to Downloads.');
     }
    }catch(err){
-    if(err.name!=='AbortError')toast('Receipt image error: '+err.message);
+    if(err.name!=='AbortError'){
+     const message='Receipt sharing failed: '+(err.message||String(err));
+     toast(message);
+     if(typeof reportAppError==='function')reportAppError('Receipt sharing failed',err);
+     console.error(message,err);
+    }
    }finally{
+    if(target)target.style.zoom=previousZoom;
     btn.disabled=false;
     btn.textContent='Share WhatsApp';
    }
