@@ -43,8 +43,10 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           npx esbuild supabase-entry.js --bundle --format=iife --outfile=www/supabase.js
+          npx esbuild native-share-entry.js --bundle --format=iife --outfile=www/native-share.js
           sed -i 's#https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2#./supabase.js#' www/index.html
           test -s www/supabase.js
+          test -s www/native-share.js
 
       - name: Add Android platform
         run: npx cap add android
