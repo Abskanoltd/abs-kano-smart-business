@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/index.html
-          cp "abs-kano-option4(1).png" "www/abs-kano-option4(1).png"
+          cp "logo.png" "www/logo.png"
           npx esbuild supabase-entry.js --bundle --format=iife --outfile=www/supabase.js
           sed -i 's#https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2#./supabase.js#' www/index.html
           test -s www/supabase.js
@@ -46,7 +46,7 @@ jobs:
       - name: Prepare ABS KANO native branding assets
         run: |
           mkdir -p assets
-          cp "abs-kano-option4(1).png" assets/logo.png
+          cp "logo.png" assets/logo.png
           npm install --no-save @capacitor/assets
 
       - name: Add Android platform
