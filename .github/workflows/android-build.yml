@@ -55,7 +55,7 @@ jobs:
         run: npx cap sync android
 
       - name: Generate Android app icon and splash screen
-        run: npx capacitor-assets generate --android --iconBackgroundColor '#0B1F3A' --iconBackgroundColorDark '#0B1F3A' --splashBackgroundColor '#FFFFFF' --splashBackgroundColorDark '#0B1F3A'
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#0B1F3A' --iconBackgroundColorDark '#0B1F3A' --splashBackgroundColor '#FFFFFF' --splashBackgroundColorDark '#0B1F3A' --logoSplashScale 0.5
 
       - name: Build APK
         working-directory: android
