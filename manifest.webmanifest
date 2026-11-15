@@ -1,19 +1,19 @@
 {
   "id": "./",
-  "name": "Smart Business",
-  "short_name": "Smart Business",
+  "name": "ABS KANO Business App",
+  "short_name": "ABS KANO",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f6fa",
   "theme_color": "#142b49",
-  "description": "Smart Business — simple business management for every shop.",
+  "description": "ABS KANO Business App — business management by ABS KANO LTD.",
   "icons": [
     {
-      "src": "./smart-business-icon.jpg",
-      "sizes": "256x256",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "src": "./abs-kano-option4(1).png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
