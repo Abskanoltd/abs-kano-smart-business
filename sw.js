@@ -1,5 +1,5 @@
-const CACHE='smart-business-v7';
-const FILES=['./','./index.html','./manifest.webmanifest','./smart-business-icon.jpg'];
+const CACHE='abs-kano-business-v8';
+const FILES=['./','./index.html','./manifest.webmanifest','./smart-business-icon.jpg','./abs-kano-option4(1).png'];
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
