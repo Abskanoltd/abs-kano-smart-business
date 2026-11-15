@@ -10,7 +10,7 @@
   "description": "ABS KANO Business App — business management by ABS KANO LTD.",
   "icons": [
     {
-      "src": "./abs-kano-option4(1).png",
+      "src": "./logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
