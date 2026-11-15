@@ -180,10 +180,26 @@ img,video,canvas,svg{max-width:100%}
 }
 @media print{body{background:#fff}.no-print,header,main>*:not(#printArea),#modal{display:none!important}#printArea{display:block!important}.receipt{width:100%;max-width:none}}
 .auth-brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 auto 18px;text-align:center;color:var(--ink);font-weight:750}.auth-brand img{width:min(190px,55vw);height:auto;max-height:190px;object-fit:contain;border-radius:18px}.logo{width:54px;height:54px;flex-basis:54px;object-fit:contain}
+
+/* Mobile login layout repair: keep the authentication card full-width and readable. */
+.auth{display:block;width:100%;max-width:480px;min-width:0;margin:7vh auto;padding:22px;box-sizing:border-box}
+.auth>*{min-width:0;max-width:100%}
+.auth form{width:100%;min-width:0}
+.auth input,.auth select,.auth textarea{display:block;width:100%;min-width:0}
+.auth .tabs{display:flex;width:100%;gap:8px}
+.auth .tabs button{flex:1 1 0;min-width:0;white-space:normal}
+.auth form button{max-width:100%;white-space:normal}
+@media(max-width:600px){
+ main{width:100%;padding-left:12px;padding-right:12px}
+ .auth{width:100%;max-width:480px;margin:18px auto;padding:18px}
+ .auth-brand img{width:min(150px,42vw);max-height:150px}
+ #authTitle{font-size:clamp(26px,7vw,34px);overflow-wrap:anywhere}
+ #authDesc{line-height:1.45;overflow-wrap:anywhere}
+}
 </style>
 </head><body>
 <div id="absSplash" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(145deg,#071a35,#164b83);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;text-align:center"><img src="./logo.png" alt="ABS KANO" style="width:min(78vw,340px);height:auto;max-height:48vh;object-fit:contain;border-radius:22px"><div style="font-size:22px;font-weight:800;margin-top:20px">ABS KANO Business App</div><div style="font-size:13px;opacity:.85;margin-top:6px">ABS KANO LTD</div></div><script>window.addEventListener("load",()=>setTimeout(()=>document.getElementById("absSplash")?.remove(),1300));setTimeout(()=>document.getElementById("absSplash")?.remove(),4500);</script>
-<header><header><div class="brand"><img class="logo" src="./logo.png" alt="ABS KANO Business App logo"><div><strong id="brandName">ABS KANO</strong><small>Business App</small></div></div><div class="head-actions"><button class="btn alt" id="languageBtn">Hausa</button><button class="btn alt hidden" id="logoutBtn">Log out</button></div></header>
+<header><div class="brand"><img class="logo" src="./logo.png" alt="ABS KANO Business App logo"><div><strong id="brandName">ABS KANO</strong><small>Business App</small></div></div><div class="head-actions"><button class="btn alt" id="languageBtn">Hausa</button><button class="btn alt hidden" id="logoutBtn">Log out</button></div></header>
 <main>
 <section id="authView" class="auth"><div class="auth-brand"><img src="./logo.png" alt="ABS KANO Business App logo"><strong>ABS KANO Business App</strong></div><h1 id="authTitle">Welcome</h1><p class="muted" id="authDesc">Sign in or create your business account.</p><div class="tabs"><button class="btn" id="showLogin">Sign in</button><button class="btn alt" id="showSignup">Create account</button></div>
 <form id="loginForm"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required><button class="btn" type="submit" style="width:100%;margin-top:15px">Sign in</button><p style="text-align:right;margin:12px 0 0"><button type="button" id="forgotPasswordBtn" class="btn alt">Forgot password?</button></p></form>
