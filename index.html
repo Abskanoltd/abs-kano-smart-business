@@ -349,8 +349,65 @@ db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user
   }
  }
 })();
+
+/* Super Admin-only diagnostics: detailed technical reports are never shown to staff/public users. */
+const ABS_DIAG_KEY='abs_kano_admin_diagnostics_v1';
+let absDiagnosticEvents=[];
+function absRecordDiagnostic(area,error,extra){
+ const item={time:new Date().toISOString(),area:String(area||'App'),message:String(error?.message||error||'Unknown error').slice(0,700),code:String(error?.code||error?.status||''),extra:String(extra||'').slice(0,300)};
+ absDiagnosticEvents.unshift(item);absDiagnosticEvents=absDiagnosticEvents.slice(0,60);
+ try{localStorage.setItem(ABS_DIAG_KEY,JSON.stringify(absDiagnosticEvents))}catch(_){}
+ if(typeof console!=='undefined')console.error('[ABS diagnostic]',item);
+ const panel=document.getElementById('absDiagnosticPanel');
+ if(panel&&!panel.classList.contains('hidden'))absRenderDiagnosticRows();
+}
+try{const saved=JSON.parse(localStorage.getItem(ABS_DIAG_KEY)||'[]');if(Array.isArray(saved))absDiagnosticEvents=saved.slice(0,60)}catch(_){}
+function absRenderDiagnosticRows(){
+ const rows=document.getElementById('absDiagnosticRows');if(!rows)return;
+ rows.textContent='';
+ if(!absDiagnosticEvents.length){rows.textContent='No errors have been recorded.';return}
+ absDiagnosticEvents.forEach(item=>{
+  const card=document.createElement('div');card.style.cssText='border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:8px 0;background:#fff';
+  const heading=document.createElement('strong');heading.textContent=item.area+' · '+new Date(item.time).toLocaleString();heading.style.cssText='display:block;font-size:12px;margin-bottom:5px';
+  const message=document.createElement('div');message.textContent=item.message;message.style.cssText='font-size:13px;overflow-wrap:anywhere';
+  card.append(heading,message);
+  if(item.code){const code=document.createElement('small');code.textContent='Code: '+item.code;card.append(code)}
+  if(item.extra){const extra=document.createElement('small');extra.textContent=item.extra;extra.style.cssText='display:block;color:#667085;margin-top:4px';card.append(extra)}
+  rows.append(card);
+ });
+}
+function absEnsureDiagnosticUI(){
+ if(!user||user.id!==SUPER)return;
+ let trigger=document.getElementById('absDiagnosticTrigger');
+ if(!trigger){
+  trigger=document.createElement('button');trigger.id='absDiagnosticTrigger';trigger.type='button';trigger.textContent='Admin Diagnostics';
+  trigger.style.cssText='position:fixed;right:12px;bottom:168px;z-index:30;border:0;border-radius:20px;padding:9px 13px;background:#142b49;color:white;font-size:12px;font-weight:800;box-shadow:0 3px 12px #0002';
+  trigger.onclick=()=>{const panel=document.getElementById('absDiagnosticPanel');panel.classList.toggle('hidden');if(!panel.classList.contains('hidden'))absRenderDiagnosticRows()};
+  document.body.append(trigger);
+ }
+ let panel=document.getElementById('absDiagnosticPanel');
+ if(!panel){
+  panel=document.createElement('section');panel.id='absDiagnosticPanel';panel.className='hidden';
+  panel.style.cssText='position:fixed;inset:8% 4% 12%;z-index:31;background:#f8fafc;border:1px solid #cbd5e1;border-radius:16px;padding:14px;overflow:auto;box-shadow:0 12px 40px #0004;color:#172033';
+  const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-14px;background:#f8fafc;padding:4px 0 10px';
+  const title=document.createElement('strong');title.textContent='ABS KANO · Admin Diagnostics';
+  const close=document.createElement('button');close.type='button';close.textContent='Close';close.style.cssText='border:0;border-radius:8px;padding:8px 12px;background:#e8edf5;color:#142b49;font-weight:700';close.onclick=()=>panel.classList.add('hidden');
+  top.append(title,close);
+  const intro=document.createElement('p');intro.textContent='This private report is visible only to the Super Admin on this signed-in device. It records technical errors and startup stages; it does not expose passwords or session tokens.';intro.style.cssText='font-size:12px;color:#667085;line-height:1.4';
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;margin:8px 0';
+  const copy=document.createElement('button');copy.type='button';copy.textContent='Copy report';copy.style.cssText='border:0;border-radius:8px;padding:9px 12px;background:#6727e8;color:#fff;font-weight:700';copy.onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(absDiagnosticEvents,null,2));toast('Diagnostic report copied')}catch(_){toast('Could not copy report on this device')}};
+  const clear=document.createElement('button');clear.type='button';clear.textContent='Clear report';clear.style.cssText='border:0;border-radius:8px;padding:9px 12px;background:#fee;color:#a22;font-weight:700';clear.onclick=()=>{absDiagnosticEvents=[];try{localStorage.removeItem(ABS_DIAG_KEY)}catch(_){}absRenderDiagnosticRows()};
+  actions.append(copy,clear);
+  const rows=document.createElement('div');rows.id='absDiagnosticRows';
+  panel.append(top,intro,actions,rows);document.body.append(panel);
+ }
+}
+window.addEventListener('error',event=>absRecordDiagnostic('JavaScript error',event.message||'Script error',event.filename?event.filename+':'+event.lineno:'')); 
+window.addEventListener('unhandledrejection',event=>absRecordDiagnostic('Unhandled promise',event.reason));
+
 async function startApp(){
  let stage='Starting app';
+ absRecordDiagnostic('Startup','App startup started');
  try{
   if(!user)throw new Error('Please sign in');
   staffMode=false;staffAccess=null;
@@ -374,6 +431,7 @@ async function startApp(){
     staffMode=true;staffAccess=access.data[0];
     business={id:staffAccess.business_id,business_name:staffAccess.business_name,owner_id:null};
     showApp();
+    absEnsureDiagnosticUI();
     $('staffWelcome').textContent='Welcome, '+staffAccess.staff_name+' · '+staffAccess.business_name;
     $('connectionStatus').textContent='Staff access active';
     await loadStaffProducts();
@@ -388,6 +446,7 @@ async function startApp(){
   stage='Opening dashboard';
   console.info('[ABS startup]',stage);
   showApp();
+  absEnsureDiagnosticUI();
   $('adminNav').classList.toggle('hidden',user.id!==SUPER);
   $('staffManagementCard').style.display=user.id===business.owner_id?'block':'none';
   stage='Loading business records';
@@ -398,10 +457,12 @@ async function startApp(){
   if(user.id===SUPER)await loadAdmin();
  }catch(e){
   const msg=String(e?.message||e||'Unknown error');
+  absRecordDiagnostic('Startup failure',e,stage);
   $('connectionStatus').textContent='Connection issue';
   /* Keep the authenticated session; do not send a valid user back to the login form. */
   $('authView').classList.add('hidden');
   $('appView').classList.remove('hidden');
+  absEnsureDiagnosticUI();
   $('logoutBtn').classList.remove('hidden');
   $('connectionStatus').textContent='Startup error';
   toast('Login succeeded, but app setup needs attention.');
