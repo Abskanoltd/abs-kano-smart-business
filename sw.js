@@ -1,4 +1,4 @@
-const CACHE='abs-kano-business-v8';
+const CACHE='abs-kano-business-v9';
 const FILES=['./','./index.html','./manifest.webmanifest','./smart-business-icon.jpg','./logo.png'];
 
 self.addEventListener('install',event=>{
