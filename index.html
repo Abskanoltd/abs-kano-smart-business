@@ -311,55 +311,42 @@ $('signupForm').onsubmit=async e=>{
 $('forgotPasswordBtn').onclick=async()=>{const email=$('loginEmail').value.trim();const btn=$('forgotPasswordBtn');if(!email){$('authDesc').textContent='Enter your email address first, then tap Forgot password.';$('authDesc').style.color='#b42318';$('loginEmail').focus();return}btn.disabled=true;btn.textContent='Sending…';$('authDesc').textContent='Sending password recovery email…';$('authDesc').style.color='';try{const result=await db.auth.resetPasswordForEmail(email,{redirectTo:APP_URL+'?recovery=1'});if(result.error)throw result.error;$('authDesc').textContent='Password reset email sent. Open the latest email and tap the Reset password link.';$('authDesc').style.color='#14845b'}catch(error){$('authDesc').textContent='Could not send reset email: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password reset request failed:',error)}finally{btn.disabled=false;btn.textContent='Forgot password?'}};
 $('recoveryForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;const password=$('newPassword').value;const confirmPassword=$('confirmNewPassword').value;const btn=e.currentTarget.querySelector('button[type="submit"]');if(password.length<8){$('authDesc').textContent='Password must contain at least 8 characters.';$('authDesc').style.color='#b42318';return}if(password!==confirmPassword){$('authDesc').textContent='The passwords do not match.';$('authDesc').style.color='#b42318';return}btn.disabled=true;btn.textContent='Updating…';try{const updated=await db.auth.updateUser({password});if(updated.error)throw updated.error;const email=updated.data.user?.email||'';const signedOut=await db.auth.signOut();if(signedOut.error)throw signedOut.error;user=null;recoveryMode=false;form.reset();$('recoveryForm').classList.add('hidden');document.querySelector('.tabs').classList.remove('hidden');$('showLogin').click();$('loginEmail').value=email;$('authDesc').textContent='Password updated successfully. Sign in with your new password.';$('authDesc').style.color='#14845b';toast('Password updated. Please sign in.')}catch(error){$('authDesc').textContent='Password update failed: '+(error?.message||String(error));$('authDesc').style.color='#b42318';console.error('Smart Business password update failed:',error)}finally{btn.disabled=false;btn.textContent='Update password'}};
 db.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){user=session?.user||null;showPasswordRecovery()}});
-/* Restore the recovery screen even when Supabase finishes parsing the email link before this listener is attached. */
+/* Single auth bootstrap: handle password recovery OR restore a saved session, never two competing getSession() calls. */
 (async()=>{
  try{
   const query=new URLSearchParams(window.location.search);
   const hashText=window.location.hash.startsWith('#')?window.location.hash.slice(1):window.location.hash;
   const hash=new URLSearchParams(hashText);
   const isRecovery=query.get('recovery')==='1'||query.get('type')==='recovery'||hash.get('type')==='recovery';
-  if(!isRecovery)return;
   const result=await db.auth.getSession();
   if(result.error)throw result.error;
-  if(result.data.session){
-   user=result.data.session.user;
-   showPasswordRecovery();
-  }else{
-   showAuth();
-   $('authDesc').textContent='This password reset link is expired or incomplete. Request a new password reset email and open the newest link.';
-   $('authDesc').style.color='#b42318';
-   $('loginForm').classList.remove('hidden');
-   $('recoveryForm').classList.add('hidden');
+  if(isRecovery){
+   if(result.data.session){
+    user=result.data.session.user;
+    showPasswordRecovery();
+   }else{
+    showAuth();
+    $('authDesc').textContent='This password reset link is expired or incomplete. Request a new password reset email and open the newest link.';
+    $('authDesc').style.color='#b42318';
+    $('loginForm').classList.remove('hidden');
+    $('recoveryForm').classList.add('hidden');
+   }
+   return;
   }
- }catch(error){
-  showAuth();
-  $('authDesc').textContent='Could not open password recovery: '+(error?.message||String(error));
-  $('authDesc').style.color='#b42318';
-  console.error('Smart Business recovery link error:',error);
- }
-})();
- /* Restore the existing Supabase login session whenever the app is refreshed or reopened. */
-(async()=>{
- try{
-  const query=new URLSearchParams(window.location.search);
-  const hashText=window.location.hash.startsWith('#')?window.location.hash.slice(1):window.location.hash;
-  const hash=new URLSearchParams(hashText);
-  const isRecovery=query.get('recovery')==='1'||query.get('type')==='recovery'||hash.get('type')==='recovery';
-  if(isRecovery)return;
-  const result=await db.auth.getSession();
-  if(result.error)throw result.error;
   if(loginInProgress||user)return;
   if(result.data.session){
    user=result.data.session.user;
    await startApp();
-  }else if(!loginInProgress&&!user){
+  }else{
    showAuth();
   }
  }catch(error){
-  console.error('Smart Business session restore failed:',error);
-  showAuth();
-  $('authDesc').textContent='Could not restore your login session: '+(error?.message||String(error))+' Please sign in again.';
-  $('authDesc').style.color='#b42318';
+  console.error('ABS KANO auth initialization failed:',error);
+  if(!loginInProgress&&!user){
+   showAuth();
+   $('authDesc').textContent='Could not initialize login: '+(error?.message||String(error));
+   $('authDesc').style.color='#b42318';
+  }
  }
 })();
 async function startApp(){let stage='Starting app';try{if(!user)throw new Error('Please sign in');staffMode=false;staffAccess=null;stage='Checking staff access';$('authDesc').textContent='Login successful. '+stage+'…';console.info('[ABS startup]',stage);const access=await db.rpc('get_my_staff_access');if(access.error)throw new Error(stage+': '+access.error.message);if(access.data&&access.data.length){stage='Opening staff workspace';console.info('[ABS startup]',stage);staffMode=true;staffAccess=access.data[0];business={id:staffAccess.business_id,business_name:staffAccess.business_name,owner_id:null};showApp();$('staffWelcome').textContent='Welcome, '+staffAccess.staff_name+' · '+staffAccess.business_name;$('connectionStatus').textContent='Staff access active';await loadStaffProducts();return}stage='Loading business profile';$('authDesc').textContent='Login successful. '+stage+'…';console.info('[ABS startup]',stage);await getBusiness();stage='Opening dashboard';console.info('[ABS startup]',stage);showApp();$('adminNav').classList.toggle('hidden',user.id!==SUPER);$('staffManagementCard').style.display=user.id===business.owner_id?'block':'none';stage='Loading business records';$('connectionStatus').textContent=stage+'…';console.info('[ABS startup]',stage);await loadAll();$('connectionStatus').textContent='Database connected';if(user.id===SUPER)await loadAdmin()}catch(e){const msg=String(e?.message||e||'Unknown error');$('connectionStatus').textContent='Connection issue';showAuth();$('authDesc').textContent='Login succeeded, but startup stopped at ['+stage+']: '+msg;$('authDesc').style.color='#b42318';$('authDesc').style.fontWeight='600';console.error('Smart Business startup error at ['+stage+']:',e)}}
