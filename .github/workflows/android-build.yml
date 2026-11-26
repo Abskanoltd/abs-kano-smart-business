@@ -97,6 +97,8 @@ jobs:
 
       - name: Build debug APK for testing
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/android/app/abs-kano-upload-key.p12
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
